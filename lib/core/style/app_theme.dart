@@ -20,9 +20,22 @@ class AppTheme {
           color: Colors.grey[300]!,
         ),
       ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        borderSide: const BorderSide(
+          color: Colors.green,
+        ),
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: Colors.grey[300]!,
+        ),
       ),
+    ),
+    appBarTheme: AppBarTheme(
+      color: Colors.grey[200],
+      iconTheme: const IconThemeData(color: Colors.green),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -34,11 +47,11 @@ class AppTheme {
             fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 2),
     ),
     iconTheme: const IconThemeData(
-      color: Colors.white,
+      color: Colors.grey,
     ),
     dividerColor: Colors.grey[100],
   );
