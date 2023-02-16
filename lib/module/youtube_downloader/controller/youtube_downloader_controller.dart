@@ -33,11 +33,12 @@ class YoutubeDownloaderController extends GetxController
       if (_url.queryParameters['list'] != null) {
         await for (var vid
             in ytExplode.playlists.getVideos(_url.queryParameters['list'])) {
-          playList.add(vid);
-          update();
+          if (vid.id != mainVid?.id) {
+            playList.add(vid);
+            update();
+          }
         }
       }
-      debugPrint(playList.length.toString());
     } catch (e) {
       debugPrint('init error: $e');
       AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);

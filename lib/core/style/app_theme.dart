@@ -53,7 +53,7 @@ class AppTheme {
           elevation: 2),
     ),
     iconTheme: const IconThemeData(
-      color: Colors.grey,
+      color: Colors.green,
     ),
     dividerColor: Colors.grey[100],
   );
