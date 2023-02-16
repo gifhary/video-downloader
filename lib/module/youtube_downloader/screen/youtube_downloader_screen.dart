@@ -127,10 +127,10 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                       Visibility(
                         visible: controller.playList.isNotEmpty,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 12, bottom: 8),
+                          padding: const EdgeInsets.only(top: 24, bottom: 8),
                           child: Text(
-                            'Other video in the list',
-                            style: Theme.of(context).textTheme.titleMedium,
+                            controller.playListTitle ?? '',
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ),
                       ),

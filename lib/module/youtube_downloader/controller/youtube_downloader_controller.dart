@@ -16,6 +16,7 @@ class YoutubeDownloaderController extends GetxController
   late Rx<VideoQuality> selectedMainVidQuality;
   List<VideoQuality> mainVidQualities = [];
 
+  String? playListTitle;
   List<Video> playList = [];
 
   YoutubeDownloaderController(this._url);
@@ -51,6 +52,9 @@ class YoutubeDownloaderController extends GetxController
       }
 
       if (_url.queryParameters['list'] != null) {
+        final ytplaylist =
+            await ytExplode.playlists.get(_url.queryParameters['list']);
+        playListTitle = ytplaylist.title;
         await for (var vid
             in ytExplode.playlists.getVideos(_url.queryParameters['list'])) {
           if (vid.id != mainVid?.id && !vid.isLive) {
