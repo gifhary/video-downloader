@@ -18,7 +18,6 @@ class YtQualityPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     onQualityTap(VideoQuality e) {
-      //TODO show ads for quality 720 up
       onSelected != null ? onSelected!(e) : null;
       Future.delayed(const Duration(milliseconds: 300), Get.back);
     }

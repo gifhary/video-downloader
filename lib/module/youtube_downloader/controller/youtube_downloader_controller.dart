@@ -94,6 +94,7 @@ class YoutubeDownloaderController extends GetxController
 
   downloadMainVid() async {
     if (mainVid == null) return;
+    //TODO show ads for quality 720 up
   }
 
   downloadMainVidMp3() async {
