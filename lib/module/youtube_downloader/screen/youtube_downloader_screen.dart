@@ -24,59 +24,97 @@ class YoutubeDownloaderScreen extends StatelessWidget {
             centerTitle: false,
             title: SvgPicture.asset(AppAsset.ytLogo),
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.green, width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: AppShadow.primary,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            AppImage(
-                              controller.mainVid?.thumbnails.standardResUrl ??
-                                  '',
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: DurationTag(controller.mainVid?.duration ??
-                                  const Duration()),
-                            )
-                          ],
+          body: controller.loading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : SafeArea(
+                  child: Column(
+                    mainAxisAlignment: controller.playList.isNotEmpty
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.center,
+                    children: [
+                      Visibility(
+                        visible: controller.mainVid != null,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 24),
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.green, width: 2),
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: AppShadow.primary,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Stack(
+                                        alignment: Alignment.bottomRight,
+                                        children: [
+                                          AppImage(
+                                            controller.mainVid?.thumbnails
+                                                    .standardResUrl ??
+                                                '',
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(5),
+                                            child: DurationTag(
+                                                controller.mainVid?.duration ??
+                                                    const Duration()),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8, bottom: 16),
+                                child: Text(
+                                  controller.mainVid?.title ?? '',
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const YtQualityPicker(),
+                                  SizedBox(
+                                    width: 120,
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      child: const Text('Download'),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: controller.playList.length,
+                          itemBuilder: (context, index) {
+                            return Text(index.toString());
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    YtQualityPicker(),
-                    SizedBox(
-                      width: 120,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: const Text('Download'),
-                      ),
-                    )
-                  ],
-                )
-              ],
-            ),
-          ),
         );
       },
     );

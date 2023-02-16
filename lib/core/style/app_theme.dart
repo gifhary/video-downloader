@@ -5,6 +5,8 @@ class AppTheme {
     visualDensity: VisualDensity.adaptivePlatformDensity,
     primaryColor: Colors.black,
     canvasColor: Colors.grey[200],
+    progressIndicatorTheme:
+        const ProgressIndicatorThemeData(color: Colors.green),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
@@ -41,7 +43,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
           backgroundColor: Colors.green,
-          fixedSize: const Size(double.maxFinite, 48),
+          fixedSize: const Size(double.maxFinite, 42),
           textStyle: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,

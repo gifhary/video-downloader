@@ -10,7 +10,7 @@ class YtQualityPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _showOptions() {
+    showOptions() {
       Get.bottomSheet(Container());
     }
 
@@ -27,16 +27,16 @@ class YtQualityPicker extends StatelessWidget {
             child: Text(quality.name.capitalizeFirst ?? ''),
           ),
           Container(
-            height: 42,
+            height: 38,
             width: 2,
             color: Colors.green,
           ),
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: _showOptions,
+              onTap: showOptions,
               child: const SizedBox(
-                height: 42,
+                height: 38,
                 width: 28,
                 child: Icon(
                   Icons.keyboard_arrow_down_rounded,

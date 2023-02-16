@@ -40,7 +40,7 @@ class HomeController extends GetxController with HomeRepo {
     final videoId = url.queryParameters['v'];
     final playlistId = url.queryParameters['list'];
 
-    if (videoId == null || videoId.isEmpty) {
+    if (videoId == null && playlistId == null) {
       AppToast.showMsg('Your link is invalid');
       return;
     }
