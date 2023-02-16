@@ -11,7 +11,11 @@ class YoutubeDownloaderController extends GetxController
   final ytExplode = YoutubeExplode();
 
   final Uri _url;
+
   Video? mainVid;
+  late Rx<VideoQuality> selectedMainVidQuality;
+  List<VideoQuality> mainVidQualities = [];
+
   List<Video> playList = [];
 
   YoutubeDownloaderController(this._url);
@@ -28,12 +32,28 @@ class YoutubeDownloaderController extends GetxController
     try {
       if (_url.queryParameters['v'] != null) {
         mainVid = await ytExplode.videos.get(_url.queryParameters['v']);
+        if (mainVid?.isLive ?? true) {
+          Get.back();
+          await Future.delayed(const Duration(milliseconds: 200));
+          throw 'Live video is not downloadable';
+        }
+        mainVidQualities = await _getVideoQualities(mainVid!);
+
+        final higestMuxedQuality = await _getHighestMuxedQuality(mainVid!);
+
+        if (mainVidQualities.indexOf(higestMuxedQuality) > 0) {
+          selectedMainVidQuality =
+              mainVidQualities[mainVidQualities.indexOf(higestMuxedQuality) - 1]
+                  .obs;
+        } else {
+          selectedMainVidQuality = higestMuxedQuality.obs;
+        }
       }
 
       if (_url.queryParameters['list'] != null) {
         await for (var vid
             in ytExplode.playlists.getVideos(_url.queryParameters['list'])) {
-          if (vid.id != mainVid?.id) {
+          if (vid.id != mainVid?.id && !vid.isLive) {
             playList.add(vid);
             update();
           }
@@ -41,9 +61,38 @@ class YoutubeDownloaderController extends GetxController
       }
     } catch (e) {
       debugPrint('init error: $e');
-      AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
+      AppToast.showMsg('Something went wrong, please try again later',
+          toastLength: Toast.LENGTH_LONG);
     }
     loading = false;
     update();
+  }
+
+  Future<VideoQuality> _getHighestMuxedQuality(Video video) async {
+    final manifest = await ytExplode.videos.streamsClient.getManifest(video.id);
+    return manifest.muxed.withHighestBitrate().videoQuality;
+  }
+
+  Future<List<VideoQuality>> _getVideoQualities(Video video) async {
+    final manifest = await ytExplode.videos.streamsClient.getManifest(video.id);
+
+    final qualities = manifest.video.getAllVideoQualities().toList();
+    qualities.sort((a, b) => a.index.compareTo(b.index));
+
+    return qualities;
+  }
+
+  @override
+  onClose() {
+    ytExplode.close();
+    super.onClose();
+  }
+
+  downloadMainVid() async {
+    if (mainVid == null) return;
+  }
+
+  downloadMainVidMp3() async {
+    if (mainVid == null) return;
   }
 }

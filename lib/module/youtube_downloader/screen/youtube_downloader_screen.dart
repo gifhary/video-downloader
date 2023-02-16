@@ -10,12 +10,11 @@ import 'package:video_downloader/module/youtube_downloader/widget/list_video_ite
 import 'package:video_downloader/module/youtube_downloader/widget/yt_quality_picker.dart';
 
 class YoutubeDownloaderScreen extends StatelessWidget {
-  const YoutubeDownloaderScreen({Key? key}) : super(key: key);
+  YoutubeDownloaderScreen({Key? key}) : super(key: key);
+  final url = Get.arguments['url'] as Uri;
 
   @override
   Widget build(BuildContext context) {
-    final url = Get.arguments['url'] as Uri;
-
     return GetBuilder<YoutubeDownloaderController>(
       init: YoutubeDownloaderController(url),
       builder: (YoutubeDownloaderController controller) {
@@ -59,7 +58,7 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                                       children: [
                                         AppImage(
                                           controller.mainVid?.thumbnails
-                                                  .standardResUrl ??
+                                                  .highResUrl ??
                                               '',
                                           width: double.infinity,
                                           height: double.infinity,
@@ -88,14 +87,38 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const YtQualityPicker(),
+                                Obx(
+                                  () => YtQualityPicker(
+                                    quality:
+                                        controller.selectedMainVidQuality.value,
+                                    qualities: controller.mainVidQualities,
+                                    onSelected: (quality) => controller
+                                        .selectedMainVidQuality.value = quality,
+                                  ),
+                                ),
                                 SizedBox(
                                   width: 120,
                                   child: ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Download'),
+                                    onPressed: controller.downloadMainVid,
+                                    child: const Icon(
+                                        Icons.file_download_outlined),
                                   ),
-                                )
+                                ),
+                                SizedBox(
+                                  width: 120,
+                                  child: ElevatedButton(
+                                    onPressed: controller.downloadMainVidMp3,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        Icon(Icons.file_download_outlined),
+                                        SizedBox(width: 5),
+                                        Text('MP3'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ],

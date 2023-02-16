@@ -1,20 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-enum YtQuality { low, medium, high }
+import 'package:video_downloader/common/widget/app_bottom_sheet.dart';
+import 'package:video_downloader/core/extension/video_quality_extension.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YtQualityPicker extends StatelessWidget {
-  final YtQuality quality;
-  const YtQualityPicker({Key? key, this.quality = YtQuality.medium})
+  final List<VideoQuality> qualities;
+  final VideoQuality quality;
+  final Function(VideoQuality quality)? onSelected;
+  const YtQualityPicker(
+      {Key? key,
+      required this.quality,
+      this.onSelected,
+      required this.qualities})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    onQualityTap(VideoQuality e) {
+      //TODO show ads for quality 720 up
+      onSelected != null ? onSelected!(e) : null;
+      Future.delayed(const Duration(milliseconds: 300), Get.back);
+    }
+
     showOptions() {
-      Get.bottomSheet(Container());
+      AppBottomSheet.show(SafeArea(
+        child: Column(
+          children: qualities
+              .map(
+                (e) => InkWell(
+                  onTap: () => onQualityTap(e),
+                  child: Ink(
+                    color: e == quality ? Colors.green : Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          e.displayName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                  color: e == quality
+                                      ? Colors.white
+                                      : Colors.black),
+                        ),
+                        Text(
+                          e.quality,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                  color: e == quality
+                                      ? Colors.white
+                                      : Colors.black),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      ));
     }
 
     return Container(
+      width: 120,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Colors.green, width: 2),
@@ -22,9 +76,15 @@ class YtQualityPicker extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(quality.name.capitalizeFirst ?? ''),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                quality.quality,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
           Container(
             height: 38,

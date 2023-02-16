@@ -12,6 +12,7 @@ dependencies:
   flutter_svg: ^2.0.1
   fluttertoast: ^8.1.2
   get: ^4.6.5
+  http: ^0.13.5
   validators: ^3.0.0
   youtube_explode_dart: ^1.12.3
 

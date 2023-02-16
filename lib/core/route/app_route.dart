@@ -7,7 +7,6 @@ class AppRoute {
   static final all = [
     GetPage(name: RouteConst.home, page: () => const HomeScreen()),
     GetPage(
-        name: RouteConst.ytDownloader,
-        page: () => const YoutubeDownloaderScreen()),
+        name: RouteConst.ytDownloader, page: () => YoutubeDownloaderScreen()),
   ];
 }

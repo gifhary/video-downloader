@@ -10,6 +10,7 @@ class AppImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(src);
     return Image.network(
       src,
       height: height,
