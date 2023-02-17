@@ -29,7 +29,7 @@ class YtQualityPicker extends StatelessWidget {
             //TODO
             //hide K video options for now
             //will show later for premium features
-            return e.index > VideoQuality.high1080.index
+            return e.displayName.toLowerCase().contains('k')
                 ? Container()
                 : InkWell(
                     onTap: () => onQualityTap(e),

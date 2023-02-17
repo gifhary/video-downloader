@@ -54,7 +54,7 @@ extension VideoQualityExtension on VideoQuality {
       case VideoQuality.high2880:
         return '5K';
       case VideoQuality.high3072:
-        return '6k';
+        return '6K';
       case VideoQuality.high4320:
         return '8K';
       default:

@@ -14,6 +14,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class YoutubeDownloaderController extends GetxController
     with YoutubeDownloaderRepo {
   bool loading = false;
+  bool error = false;
   final ytExplode = YoutubeExplode();
 
   final Uri _url;
@@ -29,11 +30,12 @@ class YoutubeDownloaderController extends GetxController
 
   @override
   void onInit() {
-    _initPage();
+    initPage();
     super.onInit();
   }
 
-  _initPage() async {
+  initPage() async {
+    error = false;
     loading = true;
     update();
     try {
@@ -71,6 +73,7 @@ class YoutubeDownloaderController extends GetxController
       debugPrint('init error: $e');
       AppToast.showMsg('Something went wrong, please try again later',
           toastLength: Toast.LENGTH_LONG);
+      error = true;
     }
     loading = false;
     update();
@@ -98,6 +101,7 @@ class YoutubeDownloaderController extends GetxController
 
   Future<File> _downloadAndWriteToFile(
       String filePath, StreamInfo streamInfo) async {
+    //TODO make it background process
     try {
       final stream = ytExplode.videos.streamsClient.get(streamInfo);
       final file = File(filePath);
@@ -157,7 +161,7 @@ class YoutubeDownloaderController extends GetxController
   Future<File> _downloadMuxedVideo(MuxedStreamInfo streamInfo) async {
     try {
       debugPrint('downloading muxed video');
-      final downloadDir = await _getDir();
+      final downloadDir = await repGetContentSavingDirectory();
 
       return await _downloadAndWriteToFile(
           '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp4',
@@ -175,28 +179,25 @@ class YoutubeDownloaderController extends GetxController
         AppToast.showMsg(
             'Missing audio, video will be downloaded without the audio');
       }
-      //TODO complete
 
-      return File('path');
-    } catch (e) {
-      rethrow;
-    }
-  }
+      //put in temp dir if audio not null
+      final dir = audioOnly != null
+          ? await getTemporaryDirectory()
+          : await repGetContentSavingDirectory();
+      final path = audioOnly != null
+          ? '${dir.path}/${mainVid!.id}'
+          : '${dir.path}/${mainVid!.title} - ${mainVid!.author}';
 
-  Future<Directory> _getDir() async {
-    try {
-      late Directory downloadDir;
-      if (Platform.isAndroid) {
-        downloadDir = Directory('/storage/emulated/0/Download');
-        if (!await downloadDir.exists()) {
-          final extDir = (await getExternalStorageDirectories())?.first;
-          if (extDir == null) throw 'Failed getting app directory';
-          downloadDir = extDir;
-        }
-      } else if (Platform.isIOS) {
-        downloadDir = await getApplicationDocumentsDirectory();
-      }
-      return downloadDir;
+      final video = await _downloadAndWriteToFile('$path.mp4', videoOnly);
+
+      //return video in download dir if audio null
+      if (audioOnly == null) return video;
+
+      final audio = await _downloadAndWriteToFile('$path.mp3', audioOnly);
+
+      final finalDir = await repGetContentSavingDirectory();
+      return await repoMergeVideoAudio(video, audio,
+          '${finalDir.path}/${mainVid!.title} - ${mainVid!.author}.mp4');
     } catch (e) {
       rethrow;
     }
@@ -211,7 +212,7 @@ class YoutubeDownloaderController extends GetxController
           await ytExplode.videos.streamsClient.getManifest(mainVid!.id);
       final streamInfo = manifest.audioOnly.withHighestBitrate();
 
-      final downloadDir = await _getDir();
+      final downloadDir = await repGetContentSavingDirectory();
 
       final file = await _downloadAndWriteToFile(
           '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp3',

@@ -1,8 +1,17 @@
 PODS:
+  - ffmpeg-kit-ios-min-gpl (5.1)
+  - ffmpeg_kit_flutter_min_gpl (5.1.0):
+    - ffmpeg_kit_flutter_min_gpl/min-gpl (= 5.1.0)
+    - Flutter
+  - ffmpeg_kit_flutter_min_gpl/min-gpl (5.1.0):
+    - ffmpeg-kit-ios-min-gpl (= 5.1)
+    - Flutter
   - Flutter (1.0.0)
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
+  - package_info_plus (0.4.5):
+    - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -11,28 +20,38 @@ PODS:
   - Toast (4.0.0)
 
 DEPENDENCIES:
+  - ffmpeg_kit_flutter_min_gpl (from `.symlinks/plugins/ffmpeg_kit_flutter_min_gpl/ios`)
   - Flutter (from `Flutter`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
 
 SPEC REPOS:
   trunk:
+    - ffmpeg-kit-ios-min-gpl
     - Toast
 
 EXTERNAL SOURCES:
+  ffmpeg_kit_flutter_min_gpl:
+    :path: ".symlinks/plugins/ffmpeg_kit_flutter_min_gpl/ios"
   Flutter:
     :path: Flutter
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
 
 SPEC CHECKSUMS:
+  ffmpeg-kit-ios-min-gpl: ac5eb47f98b27e26d14c009de3ce9181007ce688
+  ffmpeg_kit_flutter_min_gpl: f657651b493b7608fad9dda3ad606eb0946c9faa
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   fluttertoast: eb263d302cc92e04176c053d2385237e9f43fad0
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
