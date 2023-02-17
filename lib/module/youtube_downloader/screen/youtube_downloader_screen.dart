@@ -101,14 +101,6 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                                 const SizedBox(width: 24),
                                 Flexible(
                                   child: ElevatedButton(
-                                    onPressed: controller.downloadMainVid,
-                                    child: const Icon(
-                                        Icons.file_download_outlined),
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                Flexible(
-                                  child: ElevatedButton(
                                     onPressed: controller.downloadMainVidMp3,
                                     child: Row(
                                       mainAxisAlignment:
@@ -117,6 +109,21 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                                         Icon(Icons.file_download_outlined),
                                         SizedBox(width: 5),
                                         Text('MP3'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                                Flexible(
+                                  child: ElevatedButton(
+                                    onPressed: controller.downloadMainVid,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        Icon(Icons.file_download_outlined),
+                                        SizedBox(width: 5),
+                                        Text('MP4'),
                                       ],
                                     ),
                                   ),

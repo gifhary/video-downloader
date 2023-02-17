@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:video_downloader/core/extension/video_quality_extension.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/youtube_downloader/data/repo/youtube_downloader_repo.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -94,51 +96,135 @@ class YoutubeDownloaderController extends GetxController
     super.onClose();
   }
 
-  downloadMainVid() async {
-    if (mainVid == null) return;
-  }
-
-  downloadMainVidMp3() async {
+  Future<File> _downloadAndWriteToFile(
+      String filePath, StreamInfo streamInfo) async {
     try {
-      if (mainVid == null) throw 'MP3 cannot be downloaded';
-      AppToast.showMsg('Downloading MP3');
-
-      bool androidDownloadDirExists = true;
-
-      final manifest =
-          await ytExplode.videos.streamsClient.getManifest(mainVid!.id);
-      final streamInfo = manifest.audioOnly.withHighestBitrate();
       final stream = ytExplode.videos.streamsClient.get(streamInfo);
-
-      late Directory? downloadDir;
-      if (Platform.isAndroid) {
-        downloadDir = Directory('/storage/emulated/0/Download');
-        if (!await downloadDir.exists()) {
-          androidDownloadDirExists = false;
-          downloadDir = (await getExternalStorageDirectories())?.first;
-        }
-      } else if (Platform.isIOS) {
-        downloadDir = await getApplicationDocumentsDirectory();
-      }
-      if (downloadDir == null) throw 'Failed accessing phone directory';
-
-      final file = File(
-          '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp3');
+      final file = File(filePath);
       final fileStream = file.openWrite();
 
       int progress = 0;
       await stream.map((event) {
         progress += event.length;
-        debugPrint('${(progress / streamInfo.size.totalBytes) * 100}%');
+        debugPrint(
+            '${((progress / streamInfo.size.totalBytes) * 100).toStringAsFixed(2)}%');
         return event;
       }).pipe(fileStream);
 
       await fileStream.flush();
       await fileStream.close();
 
-      if (!androidDownloadDirExists) Share.shareXFiles([XFile(file.path)]);
+      return file;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-      AppToast.showMsg('MP3 downloaded');
+  downloadMainVid() async {
+    try {
+      if (mainVid == null) throw 'Missing video to download';
+      AppToast.showMsg(
+          'Downloading video in ${selectedMainVidQuality.value.quality}');
+
+      final manifest =
+          await ytExplode.videos.streamsClient.getManifest(mainVid!.id);
+
+      final muxed = manifest.muxed.firstWhereOrNull(
+          (element) => element.videoQuality == selectedMainVidQuality.value);
+
+      final videoOnly = manifest.videoOnly.firstWhereOrNull(
+          (element) => element.videoQuality == selectedMainVidQuality.value);
+      final audioOnly = manifest.audioOnly.withHighestBitrate();
+
+      late final File videoFile;
+
+      muxed != null
+          ? videoFile = await _downloadMuxedVideo(muxed)
+          : videoOnly != null
+              ? videoFile =
+                  await _downloadSeparatedVideoAudio(videoOnly, audioOnly)
+              : throw 'Failed getting the video';
+
+      debugPrint('video: ${videoFile.path}');
+
+      AppToast.showMsg('Video downloaded');
+    } catch (e) {
+      debugPrint('save mp4 error: $e');
+      AppToast.showMsg(e.toString());
+    }
+  }
+
+  Future<File> _downloadMuxedVideo(MuxedStreamInfo streamInfo) async {
+    try {
+      debugPrint('downloading muxed video');
+      final downloadDir = await _getDir();
+
+      return await _downloadAndWriteToFile(
+          '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp4',
+          streamInfo);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<File> _downloadSeparatedVideoAudio(
+      VideoOnlyStreamInfo videoOnly, AudioOnlyStreamInfo? audioOnly) async {
+    try {
+      debugPrint('downloading separated video audio');
+      if (audioOnly == null) {
+        AppToast.showMsg(
+            'Missing audio, video will be downloaded without the audio');
+      }
+      //TODO complete
+
+      return File('path');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Directory> _getDir() async {
+    try {
+      late Directory downloadDir;
+      if (Platform.isAndroid) {
+        downloadDir = Directory('/storage/emulated/0/Download');
+        if (!await downloadDir.exists()) {
+          final extDir = (await getExternalStorageDirectories())?.first;
+          if (extDir == null) throw 'Failed getting app directory';
+          downloadDir = extDir;
+        }
+      } else if (Platform.isIOS) {
+        downloadDir = await getApplicationDocumentsDirectory();
+      }
+      return downloadDir;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  downloadMainVidMp3() async {
+    try {
+      if (mainVid == null) throw 'Missing video to download';
+      AppToast.showMsg('Downloading MP3');
+
+      final manifest =
+          await ytExplode.videos.streamsClient.getManifest(mainVid!.id);
+      final streamInfo = manifest.audioOnly.withHighestBitrate();
+
+      final downloadDir = await _getDir();
+
+      final file = await _downloadAndWriteToFile(
+          '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp3',
+          streamInfo);
+
+      if (Platform.isAndroid &&
+          downloadDir.path
+              .contains((await PackageInfo.fromPlatform()).packageName)) {
+        //if directory contains package name, it means android download dir does not exists
+        Share.shareXFiles([XFile(file.path)]);
+      }
+
+      AppToast.showMsg('Audio downloaded');
     } catch (e) {
       debugPrint('save mp3 error: $e');
       AppToast.showMsg(e.toString());
