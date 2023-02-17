@@ -37,16 +37,6 @@ class HomeController extends GetxController with HomeRepo {
   }
 
   _validateYtUrl(Uri url) {
-    final videoId = url.queryParameters['v'];
-    final playlistId = url.queryParameters['list'];
-
-    if (videoId == null && playlistId == null) {
-      AppToast.showMsg('Your link is invalid');
-      return;
-    }
-    Get.toNamed(RouteConst.ytDownloader, arguments: {
-      'url': url,
-      'isPlaylist': playlistId != null,
-    });
+    Get.toNamed(RouteConst.ytDownloader, arguments: {'url': url});
   }
 }

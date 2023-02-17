@@ -85,27 +85,29 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                               ),
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Obx(
-                                  () => YtQualityPicker(
-                                    quality:
-                                        controller.selectedMainVidQuality.value,
-                                    qualities: controller.mainVidQualities,
-                                    onSelected: (quality) => controller
-                                        .selectedMainVidQuality.value = quality,
+                                Flexible(
+                                  child: Obx(
+                                    () => YtQualityPicker(
+                                      quality: controller
+                                          .selectedMainVidQuality.value,
+                                      qualities: controller.mainVidQualities,
+                                      onSelected: (quality) => controller
+                                          .selectedMainVidQuality
+                                          .value = quality,
+                                    ),
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 120,
+                                const SizedBox(width: 24),
+                                Flexible(
                                   child: ElevatedButton(
                                     onPressed: controller.downloadMainVid,
                                     child: const Icon(
                                         Icons.file_download_outlined),
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 120,
+                                const SizedBox(width: 24),
+                                Flexible(
                                   child: ElevatedButton(
                                     onPressed: controller.downloadMainVidMp3,
                                     child: Row(

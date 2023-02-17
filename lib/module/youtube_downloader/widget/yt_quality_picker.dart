@@ -67,7 +67,7 @@ class YtQualityPicker extends StatelessWidget {
     }
 
     return Container(
-      width: 120,
+      width: double.maxFinite,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Colors.green, width: 2),
@@ -77,7 +77,7 @@ class YtQualityPicker extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 quality.quality,
                 maxLines: 1,
@@ -96,7 +96,7 @@ class YtQualityPicker extends StatelessWidget {
               onTap: showOptions,
               child: const SizedBox(
                 height: 38,
-                width: 28,
+                width: 25,
                 child: Icon(
                   Icons.keyboard_arrow_down_rounded,
                   color: Colors.green,
