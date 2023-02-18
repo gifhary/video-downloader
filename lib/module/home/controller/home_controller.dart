@@ -19,12 +19,13 @@ class HomeController extends GetxController with HomeRepo {
       final url = Uri.parse(urlStr);
       switch (url.host.replaceAll('www.', '')) {
         case CommonConst.ytDomain:
-          _validateYtUrl(url);
+          _goToYtDownloader(url);
           break;
         case CommonConst.ytShortDomain:
-          _validateYtUrl(url);
+          _goToYtDownloader(url);
           break;
         case CommonConst.igDomain:
+          _goToInstaDownloader(url);
           break;
         default:
           AppToast.showMsg('Your link is not supported yet');
@@ -36,7 +37,11 @@ class HomeController extends GetxController with HomeRepo {
     }
   }
 
-  _validateYtUrl(Uri url) {
+  _goToInstaDownloader(Uri url) {
+    Get.toNamed(RouteConst.instaDownloader, arguments: {'url': url});
+  }
+
+  _goToYtDownloader(Uri url) {
     Get.toNamed(RouteConst.ytDownloader, arguments: {'url': url});
   }
 }

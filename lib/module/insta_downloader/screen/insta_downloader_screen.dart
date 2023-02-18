@@ -11,12 +11,21 @@ class InstaDownloaderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<InstaDownloaderController>(
-      init: InstaDownloaderController(),
+      init: InstaDownloaderController(url),
       builder: (InstaDownloaderController controller) {
         return Scaffold(
           appBar: AppBar(
             centerTitle: false,
-            title: SvgPicture.asset(AppAsset.ytLogo),
+            title: SvgPicture.asset(
+              AppAsset.instaLogo,
+              height: 24,
+            ),
+          ),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: controller.initDataFromWebview,
+              child: const Text('Try'),
+            ),
           ),
         );
       },
