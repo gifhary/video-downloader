@@ -18,9 +18,39 @@ class InstaLoginScreen extends StatelessWidget {
         maxHeight:
             (Get.height - MediaQuery.of(context).viewInsets.bottom) * 0.8,
       ),
-      child: WebViewWidget(
-        controller: _webCtrl,
-        gestureRecognizers: {Factory(() => EagerGestureRecognizer())},
+      child: Column(
+        children: [
+          Container(
+            color: Colors.orange[200],
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.notification_important_outlined,
+                    color: Colors.yellow[900],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Flexible(
+                  child: Text(
+                      'In order to download private account contents, you need to log in to be able to access it. Instagram also limit anonymous access to their data to a few times per hour. We do not record nor share your log in credentials to anyone.'),
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: WebViewWidget(
+              controller: _webCtrl,
+              gestureRecognizers: {Factory(() => EagerGestureRecognizer())},
+            ),
+          ),
+        ],
       ),
     );
   }
