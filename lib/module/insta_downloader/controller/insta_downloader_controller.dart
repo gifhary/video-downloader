@@ -65,12 +65,25 @@ class InstaDownloaderController extends GetxController
           final map = json.decode(res.toString());
 
           //logged in and anon user, insta return different object structure
-          if (map['graphql']['shortcode_media'] != null) {
+          if (map['graphql']?['shortcode_media'] != null) {
             //for anon user, this will execute
             _parseAnonMedia(map);
           } else if (map['items'] != null) {
             //for logged in user, this will execute
             _parseMedia(map);
+          } else {
+            loading = false;
+            error = true;
+            update();
+            if (map['require_login'] ?? false) {
+              AppToast.showMsg(
+                  'Instagram has restricted your requests, please login to continue',
+                  toastLength: Toast.LENGTH_LONG);
+              return;
+            }
+
+            AppToast.showMsg('Something went wrong, please try again later',
+                toastLength: Toast.LENGTH_LONG);
           }
         },
       ));
