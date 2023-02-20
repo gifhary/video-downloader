@@ -105,7 +105,9 @@ class InstaDownloaderController extends GetxController
       final mediaType = _getMediaType(graphQlData['__typename']);
       if (mediaType == null) throw 'Unsupported media type';
 
-      final author = graphQlData['owner']['username'];
+      final author = graphQlData['owner']['username'] as String?;
+      final authorId = graphQlData['owner']['id'] as String?;
+      final postId = graphQlData['shortcode'] as String?;
 
       ContentModel? photoOrVideo;
 
@@ -121,7 +123,9 @@ class InstaDownloaderController extends GetxController
       }
 
       content = InstaContentModel(
+        authorId: authorId,
         author: author,
+        id: postId,
         mediaType: mediaType,
         photoOrVideo: photoOrVideo,
         carouselContent: carousel,
@@ -209,7 +213,9 @@ class InstaDownloaderController extends GetxController
 
       final mediaType = _getMediaType(items.first['media_type']);
       if (mediaType == null) throw 'Unsupported media type';
-      final author = items.first['user']['username'];
+      final author = items.first['user']['username'] as String?;
+      final authorId = items.first['user']['pk_id'] as String?;
+      final postId = items.first['code'] as String?;
 
       ContentModel? photoOrVideo;
 
@@ -225,6 +231,8 @@ class InstaDownloaderController extends GetxController
       }
 
       content = InstaContentModel(
+        id: postId,
+        authorId: authorId,
         author: author,
         mediaType: mediaType,
         photoOrVideo: photoOrVideo,

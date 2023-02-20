@@ -1,12 +1,16 @@
 import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
 
 class InstaContentModel {
+  final String? authorId;
+  final String? id;
   final String? author;
   //accept all, photo, video, carousel
   final InstaMediaType mediaType;
   final ContentModel? photoOrVideo;
   final List<ContentModel>? carouselContent;
   InstaContentModel({
+    required this.authorId,
+    required this.id,
     required this.author,
     required this.mediaType,
     this.photoOrVideo,
@@ -15,7 +19,7 @@ class InstaContentModel {
 
   @override
   String toString() {
-    return 'InstaContentModel(author: $author, mediaType: $mediaType, photoOrVideo: $photoOrVideo, carouselContent: $carouselContent)';
+    return 'InstaContentModel(id: $id, author: $author, mediaType: $mediaType, photoOrVideo: $photoOrVideo, carouselContent: $carouselContent)';
   }
 }
 
