@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:video_downloader/common/utils/common_utils.dart';
 import 'package:video_downloader/core/extension/video_quality_extension.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/youtube_downloader/data/repo/youtube_downloader_repo.dart';
@@ -161,7 +162,7 @@ class YoutubeDownloaderController extends GetxController
   Future<File> _downloadMuxedVideo(MuxedStreamInfo streamInfo) async {
     try {
       debugPrint('downloading muxed video');
-      final downloadDir = await repGetContentSavingDirectory();
+      final downloadDir = await CommonUtils.getSavingDirectory();
 
       return await _downloadAndWriteToFile(
           '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp4',
@@ -183,7 +184,7 @@ class YoutubeDownloaderController extends GetxController
       //put in temp dir if audio not null
       final dir = audioOnly != null
           ? await getTemporaryDirectory()
-          : await repGetContentSavingDirectory();
+          : await CommonUtils.getSavingDirectory();
       final path = audioOnly != null
           ? '${dir.path}/${mainVid!.id}'
           : '${dir.path}/${mainVid!.title} - ${mainVid!.author}';
@@ -195,7 +196,7 @@ class YoutubeDownloaderController extends GetxController
 
       final audio = await _downloadAndWriteToFile('$path.mp3', audioOnly);
 
-      final finalDir = await repGetContentSavingDirectory();
+      final finalDir = await CommonUtils.getSavingDirectory();
       return await repoMergeVideoAudio(video, audio,
           '${finalDir.path}/${mainVid!.title} - ${mainVid!.author}.mp4');
     } catch (e) {
@@ -212,7 +213,7 @@ class YoutubeDownloaderController extends GetxController
           await ytExplode.videos.streamsClient.getManifest(mainVid!.id);
       final streamInfo = manifest.audioOnly.withHighestBitrate();
 
-      final downloadDir = await repGetContentSavingDirectory();
+      final downloadDir = await CommonUtils.getSavingDirectory();
 
       final file = await _downloadAndWriteToFile(
           '${downloadDir.path}/${mainVid!.title} - ${mainVid!.author}.mp3',

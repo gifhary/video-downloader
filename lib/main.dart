@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:video_downloader/core/route/app_route.dart';
 import 'package:video_downloader/core/route/route_const.dart';
 import 'package:video_downloader/core/style/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(debug: kDebugMode);
   runApp(const MainApp());
 }
 

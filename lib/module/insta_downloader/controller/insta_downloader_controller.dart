@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:video_downloader/common/utils/common_utils.dart';
 import 'package:video_downloader/common/widget/app_bottom_sheet.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/insta_downloader/data/constant/insta_downloader_constant.dart';
@@ -31,10 +34,28 @@ class InstaDownloaderController extends GetxController
   InstaDownloaderController(this._url, this.context);
 
   @override
-  void onInit() {
+  void onInit() async {
     initDataFromWebview();
     _initShowcase();
     super.onInit();
+  }
+
+  downloadMedia(ContentModel content) async {
+    try {
+      final dir = await CommonUtils.getSavingDirectory();
+      debugPrint(
+          '${dir.path}/${this.content.author}-${content.height}x${content.width}.${content.mediaType == InstaMediaType.photo ? 'jpg' : 'mp4'}');
+      await FlutterDownloader.enqueue(
+        url: content.url,
+        savedDir: dir.path,
+        showNotification: true,
+        openFileFromNotification: true,
+      );
+      await FlutterDownloader.loadTasks();
+    } catch (e) {
+      debugPrint('error download: $e');
+      AppToast.showMsg('msg');
+    }
   }
 
   _initShowcase() async {
@@ -62,7 +83,21 @@ class InstaDownloaderController extends GetxController
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
 
-          final map = json.decode(res.toString());
+          Map<String, dynamic> map = {};
+          try {
+            map = Platform.isAndroid
+                ? json.decode(json.decode(res.toString()))
+                : json.decode(res.toString());
+          } catch (e) {
+            loading = false;
+            error = true;
+            update();
+            debugPrint(res.toString());
+            debugPrint('decode error: $e');
+            AppToast.showMsg('Something went wrong, please try again later',
+                toastLength: Toast.LENGTH_LONG);
+            return;
+          }
 
           //logged in and anon user, insta return different object structure
           if (map['graphql']?['shortcode_media'] != null) {

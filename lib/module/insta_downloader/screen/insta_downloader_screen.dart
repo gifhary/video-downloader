@@ -5,6 +5,8 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:video_downloader/common/widget/app_image.dart';
 import 'package:video_downloader/core/assets/app_asset.dart';
 import 'package:video_downloader/module/insta_downloader/controller/insta_downloader_controller.dart';
+import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
+import 'package:video_downloader/module/insta_downloader/widget/media_type_photo_display.dart';
 
 class InstaDownloaderScreen extends StatelessWidget {
   InstaDownloaderScreen({Key? key}) : super(key: key);
@@ -64,22 +66,38 @@ class InstaDownloaderScreen extends StatelessWidget {
                             ),
                           ),
                         )
-                      : Column(
-                          children: [
-                            SizedBox(
-                              height: 400,
-                              child: Center(
-                                child: AppImage(controller
-                                        .content.photoOrVideo?.thumbnail ??
-                                    controller.content.carouselContent?.first
-                                        .thumbnail ??
-                                    ''),
+                      : Builder(builder: (context) {
+                          if (controller.content.mediaType ==
+                              InstaMediaType.photo) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child:
+                                    MediaTypePhotoDisplay(
+                                        onDownload: controller
+                                                    .content.photoOrVideo !=
+                                                null
+                                            ? () => controller.downloadMedia(
+                                                controller
+                                                    .content.photoOrVideo!)
+                                            : null,
+                                        url: controller
+                                                .content.photoOrVideo?.url ??
+                                            '',
+                                        author: controller.content.author ?? '',
+                                        height:
+                                            controller.content.photoOrVideo
+                                                    ?.height ??
+                                                0,
+                                        width: controller
+                                                .content.photoOrVideo?.width ??
+                                            0),
                               ),
-                            ),
-                            Text(
-                                '${controller.content.photoOrVideo?.width ?? controller.content.carouselContent?.first.width} x ${controller.content.photoOrVideo?.height ?? controller.content.carouselContent?.first.height}')
-                          ],
-                        ),
+                            );
+                          }
+
+                          return Container();
+                        }),
             );
           },
         );
