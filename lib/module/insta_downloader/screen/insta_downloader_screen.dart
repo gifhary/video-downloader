@@ -71,11 +71,13 @@ class InstaDownloaderScreen extends StatelessWidget {
                               child: Center(
                                 child: AppImage(controller
                                         .content.photoOrVideo?.thumbnail ??
+                                    controller.content.carouselContent?.first
+                                        .thumbnail ??
                                     ''),
                               ),
                             ),
                             Text(
-                                '${controller.content.photoOrVideo?.width} x ${controller.content.photoOrVideo?.height}')
+                                '${controller.content.photoOrVideo?.width ?? controller.content.carouselContent?.first.width} x ${controller.content.photoOrVideo?.height ?? controller.content.carouselContent?.first.height}')
                           ],
                         ),
             );

@@ -25,11 +25,13 @@ class ContentModel {
   //carousel should not be here
   final InstaMediaType mediaType;
   final Duration? videoDuration;
+  final bool hasAudio;
   final int width;
   final int height;
   ContentModel({
     required this.thumbnail,
     required this.url,
+    required this.hasAudio,
     required this.mediaType,
     this.videoDuration,
     required this.width,
@@ -38,6 +40,6 @@ class ContentModel {
 
   @override
   String toString() {
-    return 'ContentModel(thumbnail: $thumbnail, url: $url, mediaType: $mediaType, videoDuration: $videoDuration, width: $width, height: $height)';
+    return 'ContentModel(thumbnail: $thumbnail, hasAudio: $hasAudio, url: $url, mediaType: $mediaType, videoDuration: $videoDuration, width: $width, height: $height)';
   }
 }

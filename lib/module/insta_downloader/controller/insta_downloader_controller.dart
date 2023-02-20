@@ -62,7 +62,16 @@ class InstaDownloaderController extends GetxController
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
 
-          _parseMedia(res);
+          final map = json.decode(res.toString());
+
+          //logged in and anon user, insta return different object structure
+          if (map['graphql']['shortcode_media'] != null) {
+            //for anon user, this will execute
+            _parseAnonMedia(map);
+          } else if (map['items'] != null) {
+            //for logged in user, this will execute
+            _parseMedia(map);
+          }
         },
       ));
     } catch (e) {
@@ -75,11 +84,113 @@ class InstaDownloaderController extends GetxController
     }
   }
 
-  _parseMedia(dynamic res) {
+  _parseAnonMedia(dynamic map) {
     try {
-      //i dont know why, you have to decode the string twice
-      final map = json.decode(json.decode(res.toString()));
+      final graphQlData = map['graphql']['shortcode_media'];
+      if (graphQlData == null) throw 'Content not found';
 
+      final mediaType = _getMediaType(graphQlData['__typename']);
+      if (mediaType == null) throw 'Unsupported media type';
+
+      final author = graphQlData['owner']['username'];
+
+      ContentModel? photoOrVideo;
+
+      if (mediaType == InstaMediaType.photo) {
+        photoOrVideo = _parseAnonPhoto(graphQlData);
+      } else if (mediaType == InstaMediaType.video) {
+        photoOrVideo = _parseAnonVideo(graphQlData);
+      }
+
+      List<ContentModel>? carousel;
+      if (mediaType == InstaMediaType.carousel) {
+        carousel = _parseAnonCarousel(graphQlData);
+      }
+
+      content = InstaContentModel(
+        author: author,
+        mediaType: mediaType,
+        photoOrVideo: photoOrVideo,
+        carouselContent: carousel,
+      );
+      log('anon content: $content');
+    } catch (e) {
+      debugPrint('error anon parsing: $e');
+      AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
+      error = true;
+    }
+    loading = false;
+    update();
+  }
+
+  ContentModel _parseAnonPhoto(dynamic data) {
+    final url = data['display_url'] as String?;
+    final width = data['dimensions']['width'] as int?;
+    final height = data['dimensions']['height'] as int?;
+
+    if (url == null) throw 'Photo not found';
+
+    return ContentModel(
+      thumbnail: url,
+      url: url,
+      hasAudio: false,
+      mediaType: InstaMediaType.photo,
+      width: width ?? 0,
+      height: height ?? 0,
+    );
+  }
+
+  ContentModel _parseAnonVideo(dynamic data) {
+    final thumbnail = data['display_url'] as String?;
+    final url = data['video_url'] as String?;
+    final width = data['dimensions']['width'] as int?;
+    final height = data['dimensions']['height'] as int?;
+    final duration = data['video_duration'] as double?;
+    final hasAudio = data['has_audio'] ?? false;
+
+    if (url == null) throw 'Video not found';
+
+    return ContentModel(
+      thumbnail: thumbnail ?? '',
+      url: url,
+      hasAudio: hasAudio,
+      mediaType: InstaMediaType.video,
+      videoDuration: Duration(seconds: duration?.round() ?? 0),
+      width: width ?? 0,
+      height: height ?? 0,
+    );
+  }
+
+  List<ContentModel> _parseAnonCarousel(dynamic data) {
+    List<ContentModel> carousel = [];
+    final dataList = data['edge_sidecar_to_children']['edges'] as List?;
+
+    if (dataList == null || dataList.isEmpty) throw 'Contents not found';
+
+    for (var e in dataList) {
+      final node = e['node'];
+
+      debugPrint(node.toString());
+
+      final mediaType = _getMediaType(node['__typename']);
+
+      ContentModel? content;
+      if (mediaType == InstaMediaType.photo) {
+        content = _parseAnonPhoto(node);
+      } else if (mediaType == InstaMediaType.video) {
+        content = _parseAnonVideo(node);
+      }
+
+      if (content != null) {
+        carousel.add(content);
+      }
+    }
+
+    return carousel;
+  }
+
+  _parseMedia(dynamic map) {
+    try {
       final items = (map['items'] as List?)?.map((e) => e).toList();
       if (items == null || items.isEmpty) throw 'Content not found';
 
@@ -152,12 +263,14 @@ class InstaDownloaderController extends GetxController
     final width = videoVersions.first['width'] as int?;
     final height = videoVersions.first['height'] as int?;
     final duration = data['video_duration'] as double?;
+    final hasAudio = data['has_audio'] ?? false;
 
     if (url == null) throw 'Video not found';
 
     return ContentModel(
       thumbnail: thumbnail ?? '',
       url: url,
+      hasAudio: hasAudio,
       mediaType: InstaMediaType.video,
       videoDuration: Duration(seconds: duration?.round() ?? 0),
       width: width ?? 0,
@@ -178,6 +291,7 @@ class InstaDownloaderController extends GetxController
 
     return ContentModel(
       thumbnail: url,
+      hasAudio: false,
       url: url,
       mediaType: InstaMediaType.photo,
       width: width ?? 0,
@@ -185,13 +299,19 @@ class InstaDownloaderController extends GetxController
     );
   }
 
-  InstaMediaType? _getMediaType(int type) {
+  InstaMediaType? _getMediaType(dynamic type) {
     switch (type) {
       case 1:
         return InstaMediaType.photo;
       case 2:
         return InstaMediaType.video;
       case 8:
+        return InstaMediaType.carousel;
+      case 'GraphImage':
+        return InstaMediaType.photo;
+      case 'GraphVideo':
+        return InstaMediaType.video;
+      case 'GraphSidecar':
         return InstaMediaType.carousel;
       default:
         return null;
