@@ -80,11 +80,17 @@ class YtQualityPicker extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                quality.quality,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Center(
+                child: Text(
+                  quality.quality,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontSize: 12),
+                ),
               ),
             ),
           ),
@@ -99,9 +105,10 @@ class YtQualityPicker extends StatelessWidget {
               onTap: showOptions,
               child: const SizedBox(
                 height: 38,
-                width: 25,
+                width: 20,
                 child: Icon(
                   Icons.keyboard_arrow_down_rounded,
+                  size: 20,
                   color: Colors.green,
                 ),
               ),

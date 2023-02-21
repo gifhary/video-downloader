@@ -14,10 +14,6 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>FDAllFilesDownloadedMessage</key>
-	<string>All files have been downloaded</string>
-	<key>FDMaximumConcurrentTasks</key>
-	<integer>5</integer>
 	<key>CFBundleName</key>
 	<string>video_downloader</string>
 	<key>CFBundlePackageType</key>
@@ -33,10 +29,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
+	<array/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

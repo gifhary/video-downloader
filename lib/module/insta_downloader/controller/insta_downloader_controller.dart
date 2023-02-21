@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,24 +36,17 @@ class InstaDownloaderController extends GetxController
   void onInit() async {
     initDataFromWebview();
     _initShowcase();
+
     super.onInit();
   }
 
   downloadMedia(ContentModel content) async {
     try {
       final dir = await CommonUtils.getSavingDirectory();
-      debugPrint(
-          '${dir.path}/${this.content.author}-${content.height}x${content.width}.${content.mediaType == InstaMediaType.photo ? 'jpg' : 'mp4'}');
-      await FlutterDownloader.enqueue(
-        url: content.url,
-        savedDir: dir.path,
-        showNotification: true,
-        openFileFromNotification: true,
-      );
-      await FlutterDownloader.loadTasks();
+      //
     } catch (e) {
       debugPrint('error download: $e');
-      AppToast.showMsg('msg');
+      AppToast.showMsg('Download failed');
     }
   }
 
@@ -116,8 +108,8 @@ class InstaDownloaderController extends GetxController
                   toastLength: Toast.LENGTH_LONG);
               return;
             }
-
-            AppToast.showMsg('Something went wrong, please try again later',
+            debugPrint('error here: $map');
+            AppToast.showMsg('No content found',
                 toastLength: Toast.LENGTH_LONG);
           }
         },
@@ -140,6 +132,8 @@ class InstaDownloaderController extends GetxController
       final mediaType = _getMediaType(graphQlData['__typename']);
       if (mediaType == null) throw 'Unsupported media type';
 
+      final authorPofilePic =
+          graphQlData['owner']['profile_pic_url'] as String?;
       final author = graphQlData['owner']['username'] as String?;
       final authorId = graphQlData['owner']['id'] as String?;
       final postId = graphQlData['shortcode'] as String?;
@@ -158,6 +152,7 @@ class InstaDownloaderController extends GetxController
       }
 
       content = InstaContentModel(
+        authorProfilePic: authorPofilePic,
         authorId: authorId,
         author: author,
         id: postId,
@@ -184,6 +179,7 @@ class InstaDownloaderController extends GetxController
 
     return ContentModel(
       thumbnail: url,
+      sizeOptions: [],
       url: url,
       hasAudio: false,
       mediaType: InstaMediaType.photo,
@@ -202,7 +198,16 @@ class InstaDownloaderController extends GetxController
 
     if (url == null) throw 'Video not found';
 
+    List<Size> splitSizes = [];
+
+    for (double i = 1.5;
+        (height ?? 0) / i > 144 && (width ?? 0) / i > 144;
+        i + 1.5) {
+      splitSizes.add(Size((width ?? 0) / i, (height ?? 0) / i));
+    }
+
     return ContentModel(
+      sizeOptions: splitSizes,
       thumbnail: thumbnail ?? '',
       url: url,
       hasAudio: hasAudio,
@@ -248,6 +253,8 @@ class InstaDownloaderController extends GetxController
 
       final mediaType = _getMediaType(items.first['media_type']);
       if (mediaType == null) throw 'Unsupported media type';
+      final authorProfilePic =
+          items.first['user']['profile_pic_url'] as String?;
       final author = items.first['user']['username'] as String?;
       final authorId = items.first['user']['pk_id'] as String?;
       final postId = items.first['code'] as String?;
@@ -266,6 +273,7 @@ class InstaDownloaderController extends GetxController
       }
 
       content = InstaContentModel(
+        authorProfilePic: authorProfilePic,
         id: postId,
         authorId: authorId,
         author: author,
@@ -323,7 +331,20 @@ class InstaDownloaderController extends GetxController
 
     if (url == null) throw 'Video not found';
 
+    List<Size> splitSizes = [
+      Size((width ?? 0).toDouble(), (height ?? 0).toDouble())
+    ];
+
+    for (double i = 1.5;
+        (height ?? 0) / i >= 240 && (width ?? 0) / i >= 240;
+        i += 1.5) {
+      debugPrint(i.toString());
+      splitSizes.add(Size(((width ?? 0) / i), (height ?? 0) / i));
+      debugPrint('add');
+    }
+
     return ContentModel(
+      sizeOptions: splitSizes,
       thumbnail: thumbnail ?? '',
       url: url,
       hasAudio: hasAudio,
@@ -346,6 +367,7 @@ class InstaDownloaderController extends GetxController
     if (url == null) throw 'Photo not found';
 
     return ContentModel(
+      sizeOptions: [],
       thumbnail: url,
       hasAudio: false,
       url: url,

@@ -66,38 +66,71 @@ class InstaDownloaderScreen extends StatelessWidget {
                             ),
                           ),
                         )
-                      : Builder(builder: (context) {
-                          if (controller.content.mediaType ==
-                              InstaMediaType.photo) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child:
-                                    MediaTypePhotoDisplay(
-                                        onDownload: controller
-                                                    .content.photoOrVideo !=
-                                                null
-                                            ? () => controller.downloadMedia(
-                                                controller
-                                                    .content.photoOrVideo!)
-                                            : null,
-                                        url: controller
-                                                .content.photoOrVideo?.url ??
-                                            '',
-                                        author: controller.content.author ?? '',
-                                        height:
-                                            controller.content.photoOrVideo
-                                                    ?.height ??
-                                                0,
-                                        width: controller
-                                                .content.photoOrVideo?.width ??
-                                            0),
+                      : Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    debugPrint('tap');
+                                  },
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: AppImage(
+                                          controller.content.authorProfilePic ??
+                                              '',
+                                          height: 30,
+                                          width: 30,
+                                          placeholderSize: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(controller.content.author ?? ''),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            );
-                          }
+                              Builder(builder: (context) {
+                                if (controller.content.mediaType ==
+                                        InstaMediaType.photo ||
+                                    controller.content.mediaType ==
+                                        InstaMediaType.video) {
+                                  return MediaTypePhotoDisplay(
+                                      hasAudio: controller
+                                          .content.photoOrVideo?.hasAudio,
+                                      type: controller.content.mediaType,
+                                      qualities: controller.content.photoOrVideo
+                                              ?.sizeOptions ??
+                                          [],
+                                      onDownload: controller
+                                                  .content.photoOrVideo !=
+                                              null
+                                          ? () => controller.downloadMedia(
+                                              controller.content.photoOrVideo!)
+                                          : null,
+                                      url: controller.content.photoOrVideo
+                                              ?.thumbnail ??
+                                          '',
+                                      author: controller.content.author ?? '',
+                                      height: controller
+                                              .content.photoOrVideo?.height
+                                              .toInt() ??
+                                          0,
+                                      width: controller
+                                              .content.photoOrVideo?.width
+                                              .toInt() ??
+                                          0);
+                                }
 
-                          return Container();
-                        }),
+                                return Container();
+                              }),
+                            ],
+                          ),
+                        ),
             );
           },
         );

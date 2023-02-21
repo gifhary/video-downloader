@@ -5,7 +5,9 @@ class AppImage extends StatelessWidget {
   final double? height;
   final double? width;
   final BoxFit? fit;
-  const AppImage(this.src, {Key? key, this.height, this.width, this.fit})
+  final double? placeholderSize;
+  const AppImage(this.src,
+      {Key? key, this.height, this.width, this.fit, this.placeholderSize})
       : super(key: key);
 
   @override
@@ -19,10 +21,10 @@ class AppImage extends StatelessWidget {
         height: height ?? double.infinity,
         width: width ?? double.infinity,
         color: Colors.grey[400],
-        child: const Icon(
+        child: Icon(
           Icons.broken_image_outlined,
           color: Colors.white,
-          size: 50,
+          size: placeholderSize ?? 50,
         ),
       ),
     );

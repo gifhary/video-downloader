@@ -110,7 +110,7 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 24),
+                                    const SizedBox(width: 16),
                                     Flexible(
                                       child: ElevatedButton(
                                         onPressed:
@@ -126,7 +126,7 @@ class YoutubeDownloaderScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 24),
+                                    const SizedBox(width: 16),
                                     Flexible(
                                       child: ElevatedButton(
                                         onPressed: controller.downloadMainVid,

@@ -19,6 +19,18 @@ class AppNetworkClient {
     }
   }
 
+  static Future<Response> head(
+    String url,
+  ) async {
+    try {
+      final res = await _dio.head(url);
+      debugPrint('CALLING HEAD ${res.requestOptions.path}');
+      return res;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<Response> post(
     String url, {
     Map<String, dynamic>? data,
