@@ -7,23 +7,29 @@ import 'package:video_downloader/module/insta_downloader/widget/insta_vid_qualit
 class MediaTypePhotoDisplay extends StatelessWidget {
   final String url;
   final String author;
+  final Size? selectedQuality;
   final int height;
   final int width;
   final List<Size> qualities;
   final VoidCallback? onDownload;
+  final VoidCallback? onDownloadAudio;
   final bool? hasAudio;
   final InstaMediaType type;
-  const MediaTypePhotoDisplay(
-      {Key? key,
-      required this.url,
-      required this.author,
-      required this.height,
-      required this.width,
-      this.onDownload,
-      required this.type,
-      required this.hasAudio,
-      required this.qualities})
-      : super(key: key);
+  final Function(Size quality)? onQualitySelected;
+  const MediaTypePhotoDisplay({
+    Key? key,
+    required this.url,
+    required this.author,
+    required this.height,
+    required this.width,
+    this.onDownload,
+    required this.type,
+    required this.hasAudio,
+    required this.qualities,
+    this.onDownloadAudio,
+    required this.selectedQuality,
+    this.onQualitySelected,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,14 +93,15 @@ class MediaTypePhotoDisplay extends StatelessWidget {
                   children: [
                     Flexible(
                       child: InstaVidQualityPicker(
-                        quality: Size(width.toDouble(), height.toDouble()),
+                        quality: selectedQuality,
                         qualities: qualities,
+                        onSelected: onQualitySelected,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Flexible(
                       child: ElevatedButton(
-                        onPressed: hasAudio ?? false ? onDownload : null,
+                        onPressed: hasAudio ?? false ? onDownloadAudio : null,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [

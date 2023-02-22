@@ -52,85 +52,92 @@ class InstaDownloaderScreen extends StatelessWidget {
                   )
                 ],
               ),
-              body: controller.loading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : controller.error
-                      ? Center(
-                          child: SizedBox(
-                            width: 120,
-                            child: ElevatedButton(
-                              onPressed: controller.initDataFromWebview,
-                              child: const Text('Try Again'),
+              body: SafeArea(
+                child: controller.loading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : controller.error
+                        ? Center(
+                            child: SizedBox(
+                              width: 120,
+                              child: ElevatedButton(
+                                onPressed: controller.initDataFromWebview,
+                                child: const Text('Try Again'),
+                              ),
                             ),
-                          ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    debugPrint('tap');
-                                  },
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: AppImage(
-                                          controller.content.authorProfilePic ??
-                                              '',
-                                          height: 30,
-                                          width: 30,
-                                          placeholderSize: 20,
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      debugPrint('tap');
+                                    },
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: AppImage(
+                                            controller
+                                                    .content.authorProfilePic ??
+                                                '',
+                                            height: 30,
+                                            width: 30,
+                                            placeholderSize: 20,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(controller.content.author ?? ''),
-                                    ],
+                                        const SizedBox(width: 8),
+                                        Text(controller.content.author ?? ''),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Builder(builder: (context) {
-                                if (controller.content.mediaType ==
-                                        InstaMediaType.photo ||
-                                    controller.content.mediaType ==
-                                        InstaMediaType.video) {
-                                  return MediaTypePhotoDisplay(
-                                      hasAudio: controller
-                                          .content.photoOrVideo?.hasAudio,
-                                      type: controller.content.mediaType,
-                                      qualities: controller.content.photoOrVideo
-                                              ?.sizeOptions ??
-                                          [],
-                                      onDownload: controller
-                                                  .content.photoOrVideo !=
-                                              null
-                                          ? () => controller.downloadMedia(
-                                              controller.content.photoOrVideo!)
-                                          : null,
-                                      url: controller.content.photoOrVideo
-                                              ?.thumbnail ??
-                                          '',
-                                      author: controller.content.author ?? '',
-                                      height: controller
-                                              .content.photoOrVideo?.height
-                                              .toInt() ??
-                                          0,
-                                      width: controller
-                                              .content.photoOrVideo?.width
-                                              .toInt() ??
-                                          0);
-                                }
+                                Builder(builder: (context) {
+                                  if (controller.content.mediaType ==
+                                          InstaMediaType.photo ||
+                                      controller.content.mediaType ==
+                                          InstaMediaType.video) {
+                                    return MediaTypePhotoDisplay(
+                                        onQualitySelected: controller
+                                            .onSingleVidQualitySelected,
+                                        selectedQuality: controller.content
+                                            .photoOrVideo?.selectedResolution,
+                                        hasAudio: controller
+                                            .content.photoOrVideo?.hasAudio,
+                                        type: controller.content.mediaType,
+                                        qualities: controller.content
+                                                .photoOrVideo?.sizeOptions ??
+                                            [],
+                                        onDownload:
+                                            controller.content.photoOrVideo != null
+                                                ? () => controller
+                                                    .downloadMedia(controller
+                                                        .content.photoOrVideo!)
+                                                : null,
+                                        onDownloadAudio:
+                                            controller.content.photoOrVideo != null
+                                                ? () => controller.downloadMedia(
+                                                    controller.content.photoOrVideo!,
+                                                    audioOnly: true)
+                                                : null,
+                                        url: controller.content.photoOrVideo?.thumbnail ?? '',
+                                        author: controller.content.author ?? '',
+                                        height: controller.content.photoOrVideo?.height.toInt() ?? 0,
+                                        width: controller.content.photoOrVideo?.width.toInt() ?? 0);
+                                  }
 
-                                return Container();
-                              }),
-                            ],
+                                  return Container();
+                                }),
+                              ],
+                            ),
                           ),
-                        ),
+              ),
             );
           },
         );

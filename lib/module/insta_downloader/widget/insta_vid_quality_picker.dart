@@ -4,7 +4,7 @@ import 'package:video_downloader/common/widget/app_bottom_sheet.dart';
 
 class InstaVidQualityPicker extends StatelessWidget {
   final List<Size> qualities;
-  final Size quality;
+  final Size? quality;
   final Function(Size quality)? onSelected;
   const InstaVidQualityPicker(
       {Key? key,
@@ -50,7 +50,7 @@ class InstaVidQualityPicker extends StatelessWidget {
     }
 
     return Opacity(
-      opacity: qualities.isEmpty ? 0.4 : 1,
+      opacity: qualities.isEmpty || quality == null ? 0.4 : 1,
       child: Container(
         width: double.maxFinite,
         decoration: BoxDecoration(
@@ -65,7 +65,7 @@ class InstaVidQualityPicker extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Center(
                   child: Text(
-                    '${quality.width.round()}×${quality.height.round()}',
+                    '${quality?.width.round()}×${quality?.height.round()}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)

@@ -40,10 +40,10 @@ class InstaDownloaderController extends GetxController
     super.onInit();
   }
 
-  downloadMedia(ContentModel content) async {
+  downloadMedia(ContentModel content, {bool? audioOnly}) async {
     try {
       final dir = await CommonUtils.getSavingDirectory();
-      //
+      //TODO
     } catch (e) {
       debugPrint('error download: $e');
       AppToast.showMsg('Download failed');
@@ -62,6 +62,16 @@ class InstaDownloaderController extends GetxController
     }
   }
 
+  _getLoggedInUserId(Object cookie) {
+    final cookies = cookie.toString().split(' ');
+    final userId = cookies
+        .firstWhereOrNull((element) => element.contains('ds_user_id'))
+        ?.replaceAll(';', '')
+        .split('=')
+        .last;
+    debugPrint('user id: $userId');
+  }
+
   initDataFromWebview() async {
     loading = true;
     error = false;
@@ -74,6 +84,10 @@ class InstaDownloaderController extends GetxController
         onPageFinished: (url) async {
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
+
+          //secret :D
+          _getLoggedInUserId(
+              await webCtrl.runJavaScriptReturningResult("document.cookie"));
 
           Map<String, dynamic> map = {};
           try {
@@ -170,6 +184,11 @@ class InstaDownloaderController extends GetxController
     update();
   }
 
+  onSingleVidQualitySelected(Size quality) {
+    content.photoOrVideo?.selectedResolution = quality;
+    update();
+  }
+
   ContentModel _parseAnonPhoto(dynamic data) {
     final url = data['display_url'] as String?;
     final width = data['dimensions']['width'] as int?;
@@ -178,6 +197,7 @@ class InstaDownloaderController extends GetxController
     if (url == null) throw 'Photo not found';
 
     return ContentModel(
+      selectedResolution: null,
       thumbnail: url,
       sizeOptions: [],
       url: url,
@@ -198,7 +218,9 @@ class InstaDownloaderController extends GetxController
 
     if (url == null) throw 'Video not found';
 
-    List<Size> splitSizes = [];
+    List<Size> splitSizes = [
+      Size((width ?? 0).toDouble(), (height ?? 0).toDouble())
+    ];
 
     for (double i = 1.5;
         (height ?? 0) / i > 144 && (width ?? 0) / i > 144;
@@ -207,6 +229,9 @@ class InstaDownloaderController extends GetxController
     }
 
     return ContentModel(
+      selectedResolution: splitSizes.length > 1
+          ? splitSizes[splitSizes.length - 2]
+          : splitSizes.first,
       sizeOptions: splitSizes,
       thumbnail: thumbnail ?? '',
       url: url,
@@ -338,12 +363,14 @@ class InstaDownloaderController extends GetxController
     for (double i = 1.5;
         (height ?? 0) / i >= 240 && (width ?? 0) / i >= 240;
         i += 1.5) {
-      debugPrint(i.toString());
       splitSizes.add(Size(((width ?? 0) / i), (height ?? 0) / i));
-      debugPrint('add');
     }
+    splitSizes.sort((a, b) => a.width.compareTo(b.width));
 
     return ContentModel(
+      selectedResolution: splitSizes.length > 1
+          ? splitSizes[splitSizes.length - 2]
+          : splitSizes.first,
       sizeOptions: splitSizes,
       thumbnail: thumbnail ?? '',
       url: url,
@@ -367,6 +394,7 @@ class InstaDownloaderController extends GetxController
     if (url == null) throw 'Photo not found';
 
     return ContentModel(
+      selectedResolution: null,
       sizeOptions: [],
       thumbnail: url,
       hasAudio: false,

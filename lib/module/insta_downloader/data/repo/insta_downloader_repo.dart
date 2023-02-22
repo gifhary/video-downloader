@@ -3,9 +3,9 @@ import 'package:video_downloader/module/insta_downloader/data/network/insta_down
 class InstaDownloaderRepo {
   final _myNetwork = InstaDownloaderNetwork();
 
-  Future<dynamic> repoGetPostData(Uri url) async {
+  Future<String> repoGetUserId(String userId) async {
     try {
-      return await _myNetwork.getPostData(url);
+      return await _myNetwork.getUsername(userId);
     } catch (e) {
       rethrow;
     }

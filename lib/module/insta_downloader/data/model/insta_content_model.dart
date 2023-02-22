@@ -35,8 +35,10 @@ class ContentModel {
   final bool hasAudio;
   final num width;
   final num height;
+  Size? selectedResolution;
   final List<Size> sizeOptions;
   ContentModel({
+    required this.selectedResolution,
     required this.thumbnail,
     required this.sizeOptions,
     required this.url,
