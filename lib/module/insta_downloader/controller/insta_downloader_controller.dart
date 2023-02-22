@@ -189,6 +189,11 @@ class InstaDownloaderController extends GetxController
     update();
   }
 
+  onCarouselVidQualitySelected(int index, Size quality) {
+    content.carouselContent?[index].selectedResolution = quality;
+    update();
+  }
+
   ContentModel _parseAnonPhoto(dynamic data) {
     final url = data['display_url'] as String?;
     final width = data['dimensions']['width'] as int?;
@@ -214,7 +219,7 @@ class InstaDownloaderController extends GetxController
     final width = data['dimensions']['width'] as int?;
     final height = data['dimensions']['height'] as int?;
     final duration = data['video_duration'] as double?;
-    final hasAudio = data['has_audio'] ?? false;
+    final hasAudio = data['has_audio'] ?? true;
 
     if (url == null) throw 'Video not found';
 
@@ -352,7 +357,7 @@ class InstaDownloaderController extends GetxController
     final width = videoVersions.first['width'] as int?;
     final height = videoVersions.first['height'] as int?;
     final duration = data['video_duration'] as double?;
-    final hasAudio = data['has_audio'] ?? false;
+    final hasAudio = data['has_audio'] ?? true;
 
     if (url == null) throw 'Video not found';
 

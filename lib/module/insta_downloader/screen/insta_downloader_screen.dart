@@ -73,7 +73,7 @@ class InstaDownloaderScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.only(bottom: 12),
                                   child: GestureDetector(
                                     onTap: () {
                                       debugPrint('tap');
@@ -127,9 +127,58 @@ class InstaDownloaderScreen extends StatelessWidget {
                                                     audioOnly: true)
                                                 : null,
                                         url: controller.content.photoOrVideo?.thumbnail ?? '',
-                                        author: controller.content.author ?? '',
                                         height: controller.content.photoOrVideo?.height.toInt() ?? 0,
                                         width: controller.content.photoOrVideo?.width.toInt() ?? 0);
+                                  }
+
+                                  if (controller.content.mediaType ==
+                                      InstaMediaType.carousel) {
+                                    return Flexible(
+                                      child: ListView(
+                                        shrinkWrap: true,
+                                        children: controller
+                                                .content.carouselContent
+                                                ?.map((e) => Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 24),
+                                                      child:
+                                                          MediaTypePhotoDisplay(
+                                                        onQualitySelected: (quality) =>
+                                                            controller.onCarouselVidQualitySelected(
+                                                                controller
+                                                                        .content
+                                                                        .carouselContent
+                                                                        ?.indexOf(
+                                                                            e) ??
+                                                                    -1,
+                                                                quality),
+                                                        selectedQuality: e
+                                                            .selectedResolution,
+                                                        hasAudio: e.hasAudio,
+                                                        type: e.mediaType,
+                                                        qualities:
+                                                            e.sizeOptions,
+                                                        onDownload: () =>
+                                                            controller
+                                                                .downloadMedia(
+                                                                    e),
+                                                        onDownloadAudio: () =>
+                                                            controller
+                                                                .downloadMedia(
+                                                                    e,
+                                                                    audioOnly:
+                                                                        true),
+                                                        url: e.thumbnail,
+                                                        height:
+                                                            e.height.toInt(),
+                                                        width: e.width.toInt(),
+                                                      ),
+                                                    ))
+                                                .toList() ??
+                                            [],
+                                      ),
+                                    );
                                   }
 
                                   return Container();

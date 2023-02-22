@@ -6,7 +6,6 @@ import 'package:video_downloader/module/insta_downloader/widget/insta_vid_qualit
 
 class MediaTypePhotoDisplay extends StatelessWidget {
   final String url;
-  final String author;
   final Size? selectedQuality;
   final int height;
   final int width;
@@ -19,7 +18,6 @@ class MediaTypePhotoDisplay extends StatelessWidget {
   const MediaTypePhotoDisplay({
     Key? key,
     required this.url,
-    required this.author,
     required this.height,
     required this.width,
     this.onDownload,
@@ -72,17 +70,7 @@ class MediaTypePhotoDisplay extends StatelessWidget {
             ),
           ),
         ),
-        Visibility(
-          visible: type == InstaMediaType.photo,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              '$width × $height',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Row(
           children: [
             Visibility(
