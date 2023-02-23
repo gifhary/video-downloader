@@ -3,7 +3,7 @@ import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_t
 
 class InstaContentModel {
   final String? authorId;
-  final String? id;
+
   final String? author;
   final String? authorProfilePic;
   //accept all, photo, video, carousel
@@ -13,7 +13,6 @@ class InstaContentModel {
   InstaContentModel({
     required this.authorProfilePic,
     required this.authorId,
-    required this.id,
     required this.author,
     required this.mediaType,
     this.photoOrVideo,
@@ -22,7 +21,7 @@ class InstaContentModel {
 
   @override
   String toString() {
-    return 'InstaContentModel(authorProfilePic: $authorProfilePic id: $id, author: $author, mediaType: $mediaType, photoOrVideo: $photoOrVideo, carouselContent: $carouselContent)';
+    return 'InstaContentModel(authorProfilePic: $authorProfilePic, author: $author, mediaType: $mediaType, photoOrVideo: $photoOrVideo, carouselContent: $carouselContent)';
   }
 }
 

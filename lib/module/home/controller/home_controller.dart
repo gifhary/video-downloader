@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_downloader/common/constant/common_const.dart';
 import 'package:video_downloader/core/route/route_const.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
@@ -11,15 +12,14 @@ class HomeController extends GetxController with HomeRepo {
 
   @override
   void onInit() {
-    // Future.delayed(
-    //   const Duration(seconds: 2),
-    //   () async {
-    //     if (!(await Permission.storage.isGranted)) {
-    //       final status = await Permission.storage.request();
-    //       debugPrint('status: $status');
-    //     }
-    //   },
-    // );
+    Future.delayed(
+      const Duration(seconds: 2),
+      () async {
+        if (!(await Permission.storage.isGranted)) {
+          await Permission.storage.request();
+        }
+      },
+    );
     super.onInit();
   }
 

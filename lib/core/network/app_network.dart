@@ -5,10 +5,19 @@ class AppNetworkClient {
   static final Dio _dio = Dio()
     ..options.connectTimeout = const Duration(seconds: 10);
 
+  static void setHeader(Map<String, dynamic> header) {
+    _dio.options.headers = header;
+  }
+
+  static void removeHeader() {
+    _dio.options.headers = {};
+  }
+
   static Future<Response> get(String url,
       {Map<String, dynamic>? data, Map<String, dynamic>? customHeader}) async {
     try {
-      final res = await _dio.get(url, queryParameters: data);
+      final res = await _dio.get(url,
+          queryParameters: data, options: Options(headers: customHeader));
 
       debugPrint('CALLING GET ${res.requestOptions.path}');
       debugPrint('Query GET ${res.requestOptions.queryParameters}');

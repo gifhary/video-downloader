@@ -1,15 +1,49 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:video_downloader/core/network/app_network.dart';
-import 'package:video_downloader/module/insta_downloader/data/constant/insta_downloader_constant.dart';
+import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
+import 'package:video_downloader/module/insta_downloader/data/model/insta_content_model.dart';
+import 'package:video_downloader/module/insta_downloader/data/repo/insta_downloader_repo.dart';
 
 class InstaDownloaderNetwork {
+  Future<InstaContentModel> getUserStories(String userId) async {
+    try {
+      final repo = InstaDownloaderRepo();
+      final res = await AppNetworkClient.get(
+          'https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=$userId');
+      debugPrint('res: ${res.data}');
+
+      final map = res.data as Map<String, dynamic>;
+
+      final content = InstaContentModel(
+          authorProfilePic:
+              map['reels'][userId]['user']['profile_pic_url'] as String?,
+          authorId: userId,
+          author: map['reels'][userId]['user']['username'] as String?,
+          mediaType: InstaMediaType.stories,
+          carouselContent: (map['reels'][userId]['items'] as List?)?.map((e) {
+            final mediaType = repo.repoGetMediaType(e['media_type']);
+
+            if (mediaType == InstaMediaType.photo) {
+              return repo.repoParsePhoto(e);
+            } else if (mediaType == InstaMediaType.video) {
+              return repo.repoParseVideo(e);
+            } else {
+              throw 'Invalid media type';
+            }
+          }).toList());
+
+      return content;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> getUsername(String userId) async {
     try {
       final res = await AppNetworkClient.get(
-          'https://i.instagram.com/api/v1/users/$userId/info',
-          customHeader: {
-            'User-Agent': InstaDownloaderConstant.customUserAgent,
-          });
+        'https://i.instagram.com/api/v1/users/$userId/info',
+      );
       return res.data['user']['username'];
     } catch (e) {
       rethrow;

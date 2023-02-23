@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -10,10 +8,13 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_downloader/common/utils/common_utils.dart';
 import 'package:video_downloader/common/widget/app_bottom_sheet.dart';
+import 'package:video_downloader/core/network/app_network.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/insta_downloader/data/constant/insta_downloader_constant.dart';
 import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
 import 'package:video_downloader/module/insta_downloader/data/model/insta_content_model.dart';
+import 'package:video_downloader/module/insta_downloader/data/model/user_id_data_model.dart';
+import 'package:video_downloader/module/insta_downloader/data/network/insta_downloader_network.dart';
 import 'package:video_downloader/module/insta_downloader/data/repo/insta_downloader_repo.dart';
 import 'package:video_downloader/module/insta_downloader/screen/insta_login_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -39,6 +40,98 @@ class InstaDownloaderController extends GetxController
     initDataFromWebview();
     _initShowcase();
     super.onInit();
+  }
+
+  initDataFromWebview() async {
+    loading = true;
+    error = false;
+    update();
+    try {
+      await webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
+      await webCtrl.setUserAgent(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)');
+      await webCtrl
+          .loadRequest(Uri.parse('${_url.origin + _url.path}?__a=1&__d=dis'));
+      await webCtrl.setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (url) async {
+          final res = await webCtrl.runJavaScriptReturningResult(
+              "document.documentElement.innerText");
+
+          //secret :D
+          _getLoggedInUserId(
+              await webCtrl.runJavaScriptReturningResult("document.cookie"));
+
+          Map<String, dynamic> map = {};
+          try {
+            map = repoParseWebViewRes(res);
+          } catch (e) {
+            loading = false;
+            error = true;
+            update();
+            debugPrint('decode error: $e');
+            AppToast.showMsg('Something went wrong, please try again later',
+                toastLength: Toast.LENGTH_LONG);
+            return;
+          }
+
+          if (_url.path.split('/')[1] == 'stories') {
+            //this is for stories url
+            _parseUserData(map);
+          } else {
+            _sortParsingRoute(map);
+          }
+        },
+      ));
+    } catch (e) {
+      debugPrint('error: $e');
+      loading = false;
+      error = true;
+      update();
+      AppToast.showMsg('Something went wrong, please try again later',
+          toastLength: Toast.LENGTH_LONG);
+    }
+  }
+
+  _parseUserData(Map<String, dynamic> usrData) async {
+    try {
+      final instaUser = UserIdDataModel.fromMap(usrData);
+
+      //not putting this function in repo, it causes stack overflow
+      content =
+          await InstaDownloaderNetwork().getUserStories(instaUser.user.id);
+      debugPrint('length: ${content.carouselContent?.first.url}');
+      //TODO continue here
+      //ip got blocked
+    } catch (e) {
+      debugPrint('error parsing: $e');
+      AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
+      error = true;
+    }
+    loading = false;
+    update();
+  }
+
+  _sortParsingRoute(Map<String, dynamic> map) {
+    //logged in and anon user, insta return different object structure
+    if (map['graphql']?['shortcode_media'] != null) {
+      //for anon user, this will execute
+      _parseAnonMedia(map);
+    } else if (map['items'] != null) {
+      //for logged in user, this will execute
+      _parseMedia(map);
+    } else {
+      loading = false;
+      error = true;
+      update();
+      if (map['require_login'] ?? false) {
+        AppToast.showMsg(
+            'Instagram has restricted your requests, please login to continue',
+            toastLength: Toast.LENGTH_LONG);
+        return;
+      }
+      debugPrint('error sorting: $map');
+      AppToast.showMsg('No content found', toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   launchInstaProfile(String username) async {
@@ -114,81 +207,27 @@ class InstaDownloaderController extends GetxController
   }
 
   _getLoggedInUserId(Object cookie) {
-    final cookies = cookie.toString().split(' ');
+    debugPrint('cookies: $cookie');
+    final cookies = cookie.toString().replaceAll('"', '').split(' ');
     final userId = cookies
         .firstWhereOrNull((element) => element.contains('ds_user_id'))
         ?.replaceAll(';', '')
         .split('=')
         .last;
-    debugPrint('user id: $userId');
-  }
+    final sessionId = cookies
+        .firstWhereOrNull((element) => element.contains('sessionid'))
+        ?.replaceAll(';', '')
+        .split('=')
+        .last;
+    debugPrint('sessionid: $sessionId');
 
-  initDataFromWebview() async {
-    loading = true;
-    error = false;
-    update();
-    try {
-      await webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
-      await webCtrl.setUserAgent(
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)');
-      await webCtrl
-          .loadRequest(Uri.parse('${_url.origin + _url.path}?__a=1&__d=dis'));
-      await webCtrl.setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (url) async {
-          final res = await webCtrl.runJavaScriptReturningResult(
-              "document.documentElement.innerText");
+    AppNetworkClient.setHeader({
+      'User-Agent': InstaDownloaderConstant.customUserAgent,
+      'Cookie':
+          'ds_user_id=2221123748; sessionid=2221123748%3A0UtphkPqqpIccq%3A12%3AAYeQa9KAferlIbLZ1mSobUChk6T_Fzlc1AbHbqTY0g;',
+    });
 
-          //secret :D
-          _getLoggedInUserId(
-              await webCtrl.runJavaScriptReturningResult("document.cookie"));
-
-          Map<String, dynamic> map = {};
-          try {
-            map = Platform.isAndroid
-                ? json.decode(json.decode(res.toString()))
-                : json.decode(res.toString());
-          } catch (e) {
-            loading = false;
-            error = true;
-            update();
-            debugPrint(res.toString());
-            debugPrint('decode error: $e');
-            AppToast.showMsg('Something went wrong, please try again later',
-                toastLength: Toast.LENGTH_LONG);
-            return;
-          }
-
-          //logged in and anon user, insta return different object structure
-          if (map['graphql']?['shortcode_media'] != null) {
-            //for anon user, this will execute
-            _parseAnonMedia(map);
-          } else if (map['items'] != null) {
-            //for logged in user, this will execute
-            _parseMedia(map);
-          } else {
-            loading = false;
-            error = true;
-            update();
-            if (map['require_login'] ?? false) {
-              AppToast.showMsg(
-                  'Instagram has restricted your requests, please login to continue',
-                  toastLength: Toast.LENGTH_LONG);
-              return;
-            }
-            debugPrint('error here: $map');
-            AppToast.showMsg('No content found',
-                toastLength: Toast.LENGTH_LONG);
-          }
-        },
-      ));
-    } catch (e) {
-      debugPrint('error: $e');
-      loading = false;
-      error = true;
-      update();
-      AppToast.showMsg('Something went wrong, please try again later',
-          toastLength: Toast.LENGTH_LONG);
-    }
+    debugPrint('logged in user id: $userId');
   }
 
   _parseAnonMedia(dynamic map) {
@@ -196,21 +235,20 @@ class InstaDownloaderController extends GetxController
       final graphQlData = map['graphql']['shortcode_media'];
       if (graphQlData == null) throw 'Content not found';
 
-      final mediaType = _getMediaType(graphQlData['__typename']);
+      final mediaType = repoGetMediaType(graphQlData['__typename']);
       if (mediaType == null) throw 'Unsupported media type';
 
       final authorPofilePic =
           graphQlData['owner']['profile_pic_url'] as String?;
       final author = graphQlData['owner']['username'] as String?;
       final authorId = graphQlData['owner']['id'] as String?;
-      final postId = graphQlData['shortcode'] as String?;
 
       ContentModel? photoOrVideo;
 
       if (mediaType == InstaMediaType.photo) {
-        photoOrVideo = _parseAnonPhoto(graphQlData);
+        photoOrVideo = repoParseAnonPhoto(graphQlData);
       } else if (mediaType == InstaMediaType.video) {
-        photoOrVideo = _parseAnonVideo(graphQlData);
+        photoOrVideo = repoParseAnonVideo(graphQlData);
       }
 
       List<ContentModel>? carousel;
@@ -222,7 +260,6 @@ class InstaDownloaderController extends GetxController
         authorProfilePic: authorPofilePic,
         authorId: authorId,
         author: author,
-        id: postId,
         mediaType: mediaType,
         photoOrVideo: photoOrVideo,
         carouselContent: carousel,
@@ -247,60 +284,6 @@ class InstaDownloaderController extends GetxController
     update();
   }
 
-  ContentModel _parseAnonPhoto(dynamic data) {
-    final url = data['display_url'] as String?;
-    final width = data['dimensions']['width'] as int?;
-    final height = data['dimensions']['height'] as int?;
-
-    if (url == null) throw 'Photo not found';
-
-    return ContentModel(
-      selectedResolution: null,
-      thumbnail: url,
-      sizeOptions: [],
-      url: url,
-      hasAudio: false,
-      mediaType: InstaMediaType.photo,
-      width: width ?? 0,
-      height: height ?? 0,
-    );
-  }
-
-  ContentModel _parseAnonVideo(dynamic data) {
-    final thumbnail = data['display_url'] as String?;
-    final url = data['video_url'] as String?;
-    final width = data['dimensions']['width'] as int?;
-    final height = data['dimensions']['height'] as int?;
-    final duration = data['video_duration'] as double?;
-    final hasAudio = data['has_audio'] ?? true;
-
-    if (url == null) throw 'Video not found';
-
-    List<Size> splitSizes = [
-      Size((width ?? 0).toDouble(), (height ?? 0).toDouble())
-    ];
-
-    for (double i = 1.5;
-        (height ?? 0) / i > 144 && (width ?? 0) / i > 144;
-        i + 1.5) {
-      splitSizes.add(Size((width ?? 0) / i, (height ?? 0) / i));
-    }
-
-    return ContentModel(
-      selectedResolution: splitSizes.length > 1
-          ? splitSizes[splitSizes.length - 2]
-          : splitSizes.first,
-      sizeOptions: splitSizes,
-      thumbnail: thumbnail ?? '',
-      url: url,
-      hasAudio: hasAudio,
-      mediaType: InstaMediaType.video,
-      videoDuration: Duration(seconds: duration?.round() ?? 0),
-      width: width ?? 0,
-      height: height ?? 0,
-    );
-  }
-
   List<ContentModel> _parseAnonCarousel(dynamic data) {
     List<ContentModel> carousel = [];
     final dataList = data['edge_sidecar_to_children']['edges'] as List?;
@@ -312,13 +295,13 @@ class InstaDownloaderController extends GetxController
 
       debugPrint(node.toString());
 
-      final mediaType = _getMediaType(node['__typename']);
+      final mediaType = repoGetMediaType(node['__typename']);
 
       ContentModel? content;
       if (mediaType == InstaMediaType.photo) {
-        content = _parseAnonPhoto(node);
+        content = repoParseAnonPhoto(node);
       } else if (mediaType == InstaMediaType.video) {
-        content = _parseAnonVideo(node);
+        content = repoParseAnonVideo(node);
       }
 
       if (content != null) {
@@ -334,20 +317,19 @@ class InstaDownloaderController extends GetxController
       final items = (map['items'] as List?)?.map((e) => e).toList();
       if (items == null || items.isEmpty) throw 'Content not found';
 
-      final mediaType = _getMediaType(items.first['media_type']);
+      final mediaType = repoGetMediaType(items.first['media_type']);
       if (mediaType == null) throw 'Unsupported media type';
       final authorProfilePic =
           items.first['user']['profile_pic_url'] as String?;
       final author = items.first['user']['username'] as String?;
       final authorId = items.first['user']['pk_id'] as String?;
-      final postId = items.first['code'] as String?;
 
       ContentModel? photoOrVideo;
 
       if (mediaType == InstaMediaType.photo) {
-        photoOrVideo = _parsePhoto(items.first);
+        photoOrVideo = repoParsePhoto(items.first);
       } else if (mediaType == InstaMediaType.video) {
-        photoOrVideo = _parseVideo(items.first);
+        photoOrVideo = repoParseVideo(items.first);
       }
 
       List<ContentModel>? carousel;
@@ -357,7 +339,6 @@ class InstaDownloaderController extends GetxController
 
       content = InstaContentModel(
         authorProfilePic: authorProfilePic,
-        id: postId,
         authorId: authorId,
         author: author,
         mediaType: mediaType,
@@ -381,13 +362,13 @@ class InstaDownloaderController extends GetxController
     if (dataList == null || dataList.isEmpty) throw 'Contents not found';
 
     for (var e in dataList) {
-      final mediaType = _getMediaType(e['media_type']);
+      final mediaType = repoGetMediaType(e['media_type']);
 
       ContentModel? content;
       if (mediaType == InstaMediaType.photo) {
-        content = _parsePhoto(e);
+        content = repoParsePhoto(e);
       } else if (mediaType == InstaMediaType.video) {
-        content = _parseVideo(e);
+        content = repoParseVideo(e);
       }
 
       if (content != null) {
@@ -396,90 +377,6 @@ class InstaDownloaderController extends GetxController
     }
 
     return carousel;
-  }
-
-  ContentModel _parseVideo(dynamic data) {
-    final thumbnailVersions = data['image_versions2']['candidates'] as List?;
-    final thumbnail = thumbnailVersions?.first['url'] as String?;
-
-    final videoVersions = data['video_versions'] as List?;
-    if (videoVersions == null || videoVersions.isEmpty) {
-      throw 'Video not found';
-    }
-    final url = videoVersions.first['url'] as String?;
-    final width = videoVersions.first['width'] as int?;
-    final height = videoVersions.first['height'] as int?;
-    final duration = data['video_duration'] as double?;
-    final hasAudio = data['has_audio'] ?? true;
-
-    if (url == null) throw 'Video not found';
-
-    List<Size> splitSizes = [
-      Size((width ?? 0).toDouble(), (height ?? 0).toDouble())
-    ];
-
-    for (double i = 1.5;
-        (height ?? 0) / i >= 240 && (width ?? 0) / i >= 240;
-        i += 1.5) {
-      splitSizes.add(Size(((width ?? 0) / i), (height ?? 0) / i));
-    }
-    splitSizes.sort((a, b) => a.width.compareTo(b.width));
-
-    return ContentModel(
-      selectedResolution: splitSizes.length > 1
-          ? splitSizes[splitSizes.length - 2]
-          : splitSizes.first,
-      sizeOptions: splitSizes,
-      thumbnail: thumbnail ?? '',
-      url: url,
-      hasAudio: hasAudio,
-      mediaType: InstaMediaType.video,
-      videoDuration: Duration(seconds: duration?.round() ?? 0),
-      width: width ?? 0,
-      height: height ?? 0,
-    );
-  }
-
-  ContentModel _parsePhoto(dynamic data) {
-    final imageVersions = data['image_versions2']['candidates'] as List?;
-    if (imageVersions == null || imageVersions.isEmpty) {
-      throw 'Photo not found';
-    }
-    final url = imageVersions.first['url'] as String?;
-    final width = imageVersions.first['width'] as int?;
-    final height = imageVersions.first['height'] as int?;
-
-    if (url == null) throw 'Photo not found';
-
-    return ContentModel(
-      selectedResolution: null,
-      sizeOptions: [],
-      thumbnail: url,
-      hasAudio: false,
-      url: url,
-      mediaType: InstaMediaType.photo,
-      width: width ?? 0,
-      height: height ?? 0,
-    );
-  }
-
-  InstaMediaType? _getMediaType(dynamic type) {
-    switch (type) {
-      case 1:
-        return InstaMediaType.photo;
-      case 2:
-        return InstaMediaType.video;
-      case 8:
-        return InstaMediaType.carousel;
-      case 'GraphImage':
-        return InstaMediaType.photo;
-      case 'GraphVideo':
-        return InstaMediaType.video;
-      case 'GraphSidecar':
-        return InstaMediaType.carousel;
-      default:
-        return null;
-    }
   }
 
   loginInsta() async {

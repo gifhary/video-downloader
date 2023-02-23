@@ -1,1 +1,1 @@
-enum InstaMediaType { photo, video, carousel }
+enum InstaMediaType { photo, video, carousel, stories }
