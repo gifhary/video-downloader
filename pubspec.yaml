@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   dio: ^5.0.0
-  ffmpeg_kit_flutter_min_gpl: ^5.1.0
+  ffmpeg_kit_flutter_full: ^5.1.0
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.1
@@ -17,9 +17,11 @@ dependencies:
   http: ^0.13.5
   package_info_plus: ^3.0.3
   path_provider: ^2.0.12
+  permission_handler: ^10.2.0
   share_plus: ^6.3.1
   shared_preferences: ^2.0.17
   showcaseview: ^2.0.0+1
+  url_launcher: ^6.1.10
   validators: ^3.0.0
   webview_flutter: ^4.0.2
   youtube_explode_dart: ^1.12.3

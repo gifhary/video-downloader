@@ -173,27 +173,15 @@ class YoutubeDownloaderController extends GetxController
   }
 
   Future<File> _downloadSeparatedVideoAudio(
-      VideoOnlyStreamInfo videoOnly, AudioOnlyStreamInfo? audioOnly) async {
+      VideoOnlyStreamInfo videoOnly, AudioOnlyStreamInfo audioOnly) async {
     try {
       debugPrint('downloading separated video audio');
-      if (audioOnly == null) {
-        AppToast.showMsg(
-            'Missing audio, video will be downloaded without the audio');
-      }
 
       //put in temp dir if audio not null
-      final dir = audioOnly != null
-          ? await getTemporaryDirectory()
-          : await CommonUtils.getSavingDirectory();
-      final path = audioOnly != null
-          ? '${dir.path}/${mainVid!.id}'
-          : '${dir.path}/${mainVid!.title} - ${mainVid!.author}';
+      final tempDir = await getTemporaryDirectory();
+      final path = '${tempDir.path}/${mainVid!.id}';
 
       final video = await _downloadAndWriteToFile('$path.mp4', videoOnly);
-
-      //return video in download dir if audio null
-      if (audioOnly == null) return video;
-
       final audio = await _downloadAndWriteToFile('$path.mp3', audioOnly);
 
       final finalDir = await CommonUtils.getSavingDirectory();

@@ -9,6 +9,20 @@ import 'package:validators/validators.dart';
 class HomeController extends GetxController with HomeRepo {
   final mainTextFieldCtrl = TextEditingController();
 
+  @override
+  void onInit() {
+    // Future.delayed(
+    //   const Duration(seconds: 2),
+    //   () async {
+    //     if (!(await Permission.storage.isGranted)) {
+    //       final status = await Permission.storage.request();
+    //       debugPrint('status: $status');
+    //     }
+    //   },
+    // );
+    super.onInit();
+  }
+
   download() {
     try {
       String urlStr = mainTextFieldCtrl.text;

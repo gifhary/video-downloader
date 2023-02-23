@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_downloader/common/utils/common_utils.dart';
 import 'package:video_downloader/common/widget/app_bottom_sheet.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
@@ -36,17 +38,66 @@ class InstaDownloaderController extends GetxController
   void onInit() async {
     initDataFromWebview();
     _initShowcase();
-
     super.onInit();
+  }
+
+  launchInstaProfile(String username) async {
+    debugPrint(
+        'launching: ${InstaDownloaderConstant.instaProfileUrl(username)}');
+    if (!await launchUrl(
+        Uri.parse(InstaDownloaderConstant.instaProfileUrl(username)))) {
+      debugPrint(
+          'cannot launch url: ${InstaDownloaderConstant.instaProfileUrl(username)}');
+    }
   }
 
   downloadMedia(ContentModel content, {bool? audioOnly}) async {
     try {
-      final dir = await CommonUtils.getSavingDirectory();
-      //TODO
+      if (content.mediaType == InstaMediaType.carousel) throw 'Invalid media';
+      if ((audioOnly ?? false) && content.mediaType != InstaMediaType.video) {
+        throw 'No audio found';
+      }
+      //save video to temp dir if its audio only, then extract the audio to phone dir
+      final dir = (audioOnly ?? false)
+          ? await getTemporaryDirectory()
+          : await CommonUtils.getSavingDirectory();
+
+      final filePath =
+          '${dir.path}/${this.content.author ?? ''}-${DateTime.now().millisecondsSinceEpoch}${content.mediaType == InstaMediaType.photo ? '.jpg' : '.mp4'}';
+
+      final res = await repoDownload(
+        Uri.parse(content.url),
+        filePath,
+        onReceiveProgress: (received, total) {
+          debugPrint('rec: $received, total: $total');
+        },
+      );
+      if (audioOnly ?? false) {
+        debugPrint('downloading audio');
+        await _extractAudio(filePath,
+            '${this.content.author ?? ''}-${DateTime.now().millisecondsSinceEpoch}');
+      }
+
+      final contentTypeStr = content.mediaType == InstaMediaType.photo
+          ? 'Image'
+          : content.mediaType == InstaMediaType.video && (audioOnly ?? false)
+              ? 'Audio'
+              : 'Video';
+      AppToast.showMsg('$contentTypeStr downloaded');
     } catch (e) {
       debugPrint('error download: $e');
-      AppToast.showMsg('Download failed');
+      AppToast.showMsg(e.toString());
+    }
+  }
+
+  _extractAudio(String filePath, String finalFileName) async {
+    try {
+      final dir = await CommonUtils.getSavingDirectory();
+      // ignore: unused_local_variable
+      final finalFile =
+          await repoExtreactAudio(filePath, '${dir.path}/$finalFileName.mp3');
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -78,6 +129,8 @@ class InstaDownloaderController extends GetxController
     update();
     try {
       await webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
+      await webCtrl.setUserAgent(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)');
       await webCtrl
           .loadRequest(Uri.parse('${_url.origin + _url.path}?__a=1&__d=dis'));
       await webCtrl.setNavigationDelegate(NavigationDelegate(

@@ -75,9 +75,8 @@ class InstaDownloaderScreen extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: GestureDetector(
-                                    onTap: () {
-                                      debugPrint('tap');
-                                    },
+                                    onTap: () => controller.launchInstaProfile(
+                                        controller.content.author ?? ''),
                                     child: Row(
                                       children: [
                                         ClipRRect(

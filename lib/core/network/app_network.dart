@@ -19,6 +19,19 @@ class AppNetworkClient {
     }
   }
 
+  static Future<Response<dynamic>> download(
+    Uri uri,
+    String savePath, {
+    Function(int, int)? onReceiveProgress,
+  }) async {
+    try {
+      return await _dio.downloadUri(uri, savePath,
+          onReceiveProgress: onReceiveProgress);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<Response> head(
     String url,
   ) async {
