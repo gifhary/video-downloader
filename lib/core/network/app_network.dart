@@ -1,23 +1,24 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
-class AppNetworkClient {
-  static final Dio _dio = Dio()
+class AppNetworkClient extends GetxController {
+  static final dio.Dio _dio = dio.Dio()
     ..options.connectTimeout = const Duration(seconds: 10);
 
-  static void setHeader(Map<String, dynamic> header) {
+  void setHeader(Map<String, dynamic> header) {
     _dio.options.headers = header;
   }
 
-  static void removeHeader() {
+  void removeHeader() {
     _dio.options.headers = {};
   }
 
-  static Future<Response> get(String url,
+  Future<dio.Response> get(String url,
       {Map<String, dynamic>? data, Map<String, dynamic>? customHeader}) async {
     try {
       final res = await _dio.get(url,
-          queryParameters: data, options: Options(headers: customHeader));
+          queryParameters: data, options: dio.Options(headers: customHeader));
 
       debugPrint('CALLING GET ${res.requestOptions.path}');
       debugPrint('Query GET ${res.requestOptions.queryParameters}');
@@ -28,7 +29,7 @@ class AppNetworkClient {
     }
   }
 
-  static Future<Response<dynamic>> download(
+  Future<dio.Response<dynamic>> download(
     Uri uri,
     String savePath, {
     Function(int, int)? onReceiveProgress,
@@ -41,7 +42,7 @@ class AppNetworkClient {
     }
   }
 
-  static Future<Response> head(
+  Future<dio.Response> head(
     String url,
   ) async {
     try {
@@ -53,7 +54,7 @@ class AppNetworkClient {
     }
   }
 
-  static Future<Response> post(
+  Future<dio.Response> post(
     String url, {
     Map<String, dynamic>? data,
     Map<String, dynamic>? customHeader,
@@ -64,7 +65,7 @@ class AppNetworkClient {
   }) async {
     try {
       final res = await _dio.post(url,
-          data: form ?? jsonMap ?? FormData.fromMap(data!));
+          data: form ?? jsonMap ?? dio.FormData.fromMap(data!));
 
       debugPrint('CALLING POST ${res.requestOptions.path}');
       // debugPrint("Response Data " + res.data.toString());

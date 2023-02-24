@@ -1,17 +1,18 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:dio/dio.dart' as dio;
+import 'package:get/get.dart';
 import 'package:video_downloader/core/network/app_network.dart';
 import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
 import 'package:video_downloader/module/insta_downloader/data/model/insta_content_model.dart';
 import 'package:video_downloader/module/insta_downloader/data/repo/insta_downloader_repo.dart';
 
 class InstaDownloaderNetwork {
+  final _networkClient = Get.find<AppNetworkClient>();
+
   Future<InstaContentModel> getUserStories(String userId) async {
     try {
       final repo = InstaDownloaderRepo();
-      final res = await AppNetworkClient.get(
+      final res = await _networkClient.get(
           'https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=$userId');
-      debugPrint('res: ${res.data}');
 
       final map = res.data as Map<String, dynamic>;
 
@@ -41,22 +42,23 @@ class InstaDownloaderNetwork {
 
   Future<String> getUsername(String userId) async {
     try {
-      final res = await AppNetworkClient.get(
+      final res = await _networkClient.get(
         'https://i.instagram.com/api/v1/users/$userId/info',
       );
+
       return res.data['user']['username'];
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<Response<dynamic>> download(
+  Future<dio.Response<dynamic>> download(
     Uri uri,
     String savePath, {
     Function(int, int)? onReceiveProgress,
   }) async {
     try {
-      return await AppNetworkClient.download(uri, savePath,
+      return await _networkClient.download(uri, savePath,
           onReceiveProgress: onReceiveProgress);
     } catch (e) {
       rethrow;

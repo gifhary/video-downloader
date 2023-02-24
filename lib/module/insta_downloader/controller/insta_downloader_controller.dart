@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ import 'package:video_downloader/module/insta_downloader/data/model/user_id_data
 import 'package:video_downloader/module/insta_downloader/data/network/insta_downloader_network.dart';
 import 'package:video_downloader/module/insta_downloader/data/repo/insta_downloader_repo.dart';
 import 'package:video_downloader/module/insta_downloader/screen/insta_login_screen.dart';
+import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class InstaDownloaderController extends GetxController
@@ -54,12 +56,10 @@ class InstaDownloaderController extends GetxController
           .loadRequest(Uri.parse('${_url.origin + _url.path}?__a=1&__d=dis'));
       await webCtrl.setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) async {
+          await _setCookiesToNetworkClient();
+
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
-
-          //secret :D
-          _getLoggedInUserId(
-              await webCtrl.runJavaScriptReturningResult("document.cookie"));
 
           Map<String, dynamic> map = {};
           try {
@@ -76,7 +76,7 @@ class InstaDownloaderController extends GetxController
 
           if (_url.path.split('/')[1] == 'stories') {
             //this is for stories url
-            _parseUserData(map);
+            _parseUserStories(map);
           } else {
             _sortParsingRoute(map);
           }
@@ -92,18 +92,15 @@ class InstaDownloaderController extends GetxController
     }
   }
 
-  _parseUserData(Map<String, dynamic> usrData) async {
+  _parseUserStories(Map<String, dynamic> usrData) async {
     try {
       final instaUser = UserIdDataModel.fromMap(usrData);
 
       //not putting this function in repo, it causes stack overflow
       content =
           await InstaDownloaderNetwork().getUserStories(instaUser.user.id);
-      debugPrint('length: ${content.carouselContent?.first.url}');
-      //TODO continue here
-      //ip got blocked
-    } catch (e) {
-      debugPrint('error parsing: $e');
+    } on DioError catch (e) {
+      debugPrint('error parsing: ${e.response}');
       AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
       error = true;
     }
@@ -206,28 +203,19 @@ class InstaDownloaderController extends GetxController
     }
   }
 
-  _getLoggedInUserId(Object cookie) {
-    debugPrint('cookies: $cookie');
-    final cookies = cookie.toString().replaceAll('"', '').split(' ');
-    final userId = cookies
-        .firstWhereOrNull((element) => element.contains('ds_user_id'))
-        ?.replaceAll(';', '')
-        .split('=')
-        .last;
-    final sessionId = cookies
-        .firstWhereOrNull((element) => element.contains('sessionid'))
-        ?.replaceAll(';', '')
-        .split('=')
-        .last;
-    debugPrint('sessionid: $sessionId');
-
-    AppNetworkClient.setHeader({
+  Future<void> _setCookiesToNetworkClient() async {
+    final gotCookies =
+        await WebviewCookieManager().getCookies('https://www.instagram.com');
+    String neededCookies = '';
+    for (var item in gotCookies) {
+      if (item.name == 'ds_user_id' || item.name == 'sessionid') {
+        neededCookies += '${item.name}=${item.value};';
+      }
+    }
+    Get.find<AppNetworkClient>().setHeader({
       'User-Agent': InstaDownloaderConstant.customUserAgent,
-      'Cookie':
-          'ds_user_id=2221123748; sessionid=2221123748%3A0UtphkPqqpIccq%3A12%3AAYeQa9KAferlIbLZ1mSobUChk6T_Fzlc1AbHbqTY0g;',
+      'Cookie': neededCookies,
     });
-
-    debugPrint('logged in user id: $userId');
   }
 
   _parseAnonMedia(dynamic map) {

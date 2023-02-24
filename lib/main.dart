@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:video_downloader/core/global/global_controller.dart';
 import 'package:video_downloader/core/route/app_route.dart';
 import 'package:video_downloader/core/route/route_const.dart';
 import 'package:video_downloader/core/style/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GlobalController.init();
   runApp(const MainApp());
 }
 

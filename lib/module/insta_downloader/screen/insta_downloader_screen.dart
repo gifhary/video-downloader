@@ -131,7 +131,9 @@ class InstaDownloaderScreen extends StatelessWidget {
                                   }
 
                                   if (controller.content.mediaType ==
-                                      InstaMediaType.carousel) {
+                                          InstaMediaType.carousel ||
+                                      controller.content.mediaType ==
+                                          InstaMediaType.stories) {
                                     return Flexible(
                                       child: ListView(
                                         shrinkWrap: true,
