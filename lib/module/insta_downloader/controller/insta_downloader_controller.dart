@@ -143,6 +143,7 @@ class InstaDownloaderController extends GetxController
 
   downloadMedia(ContentModel content, {bool? audioOnly}) async {
     try {
+      //TODO make background service
       if (content.mediaType == InstaMediaType.carousel) throw 'Invalid media';
       if ((audioOnly ?? false) && content.mediaType != InstaMediaType.video) {
         throw 'No audio found';
@@ -155,7 +156,7 @@ class InstaDownloaderController extends GetxController
       final filePath =
           '${dir.path}/${this.content.author ?? ''}-${DateTime.now().millisecondsSinceEpoch}${content.mediaType == InstaMediaType.photo ? '.jpg' : '.mp4'}';
 
-      final res = await repoDownload(
+      await repoDownload(
         Uri.parse(content.url),
         filePath,
         onReceiveProgress: (received, total) {
