@@ -33,7 +33,7 @@ class InstaDownloaderScreen extends StatelessWidget {
                       child: Showcase(
                         key: controller.showcaseKey,
                         description:
-                            'Consider log in if you\'re having trouble getting the content or its from a private account',
+                            controller.loginShowCaseText,
                         child: InkWell(
                           onTap: controller.loginInsta,
                           borderRadius: BorderRadius.circular(8),

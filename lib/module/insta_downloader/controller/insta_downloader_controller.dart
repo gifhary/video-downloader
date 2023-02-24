@@ -27,6 +27,9 @@ class InstaDownloaderController extends GetxController
   bool error = false;
   final BuildContext context;
 
+  String loginShowCaseText =
+      'Consider log in if you\'re having trouble getting the content or its from a private account';
+
   final showcaseKey = GlobalKey();
 
   final Uri _url;
@@ -217,6 +220,13 @@ class InstaDownloaderController extends GetxController
       'User-Agent': InstaDownloaderConstant.customUserAgent,
       'Cookie': neededCookies,
     });
+    if (_url.path.split('/')[1] == 'stories' &&
+        !neededCookies.contains('sessionid') &&
+        context.mounted) {
+      loginShowCaseText = 'You need to login for downloading stories';
+      update();
+      ShowCaseWidget.of(context).startShowCase([showcaseKey]);
+    }
   }
 
   _parseAnonMedia(dynamic map) {
