@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_downloader/common/widget/app_shimmer.dart';
 
 class AppImage extends StatelessWidget {
   final String src;
@@ -17,6 +18,13 @@ class AppImage extends StatelessWidget {
       height: height,
       width: width,
       fit: fit,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress?.cumulativeBytesLoaded ==
+            loadingProgress?.expectedTotalBytes) {
+          return child;
+        }
+        return const AppShimmer();
+      },
       errorBuilder: (context, error, stackTrace) => Container(
         height: height ?? double.infinity,
         width: width ?? double.infinity,
