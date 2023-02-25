@@ -32,8 +32,7 @@ class InstaDownloaderScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 10),
                       child: Showcase(
                         key: controller.showcaseKey,
-                        description:
-                            controller.loginShowCaseText,
+                        description: controller.loginShowCaseText,
                         child: InkWell(
                           onTap: controller.loginInsta,
                           borderRadius: BorderRadius.circular(8),

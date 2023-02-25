@@ -66,9 +66,18 @@ class InstaDownloaderController extends GetxController
       await webCtrl.setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) async {
           await _setCookiesToNetworkClient();
+          final currentUrl = Uri.parse(
+              await webCtrl.currentUrl() ?? 'https://www.instagram.com/');
+          if (currentUrl.path.split('/')[1] == 'stories' &&
+              currentUrl.path.split('/')[2] == 'highlights') {
+            //this is for stories highlight url
+            _parseHighlightStories(currentUrl.path.split('/')[3]);
+            return;
+          }
 
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
+          debugPrint('res: $res');
 
           Map<String, dynamic> map = {};
           try {
@@ -83,7 +92,8 @@ class InstaDownloaderController extends GetxController
             return;
           }
 
-          if (_url.path.split('/')[1] == 'stories') {
+          if (currentUrl.path.split('/')[1] == 'stories' &&
+              currentUrl.path.split('/')[2] != 'highlights') {
             //this is for stories url
             _parseUserStories(map);
           } else {
@@ -111,6 +121,25 @@ class InstaDownloaderController extends GetxController
     } on DioError catch (e) {
       debugPrint('error parsing: ${e.response}');
       AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
+      error = true;
+    }
+    loading = false;
+    update();
+  }
+
+  _parseHighlightStories(String highlightId) async {
+    try {
+      //not putting this function in repo, it causes stack overflow
+      content =
+          await InstaDownloaderNetwork().getUserHighlightStories(highlightId);
+    } on DioError catch (e) {
+      debugPrint('error parsing highlight dio: ${e.response}');
+      AppToast.showMsg(e.message ?? '', toastLength: Toast.LENGTH_LONG);
+      error = true;
+    } catch (e) {
+      debugPrint('error parsing highlight: $e');
+      AppToast.showMsg('Something went wrong, please try again later',
+          toastLength: Toast.LENGTH_LONG);
       error = true;
     }
     loading = false;
@@ -226,12 +255,16 @@ class InstaDownloaderController extends GetxController
       'User-Agent': InstaDownloaderConstant.customUserAgent,
       'Cookie': neededCookies,
     });
-    if (_url.path.split('/')[1] == 'stories' &&
-        !neededCookies.contains('sessionid') &&
-        context.mounted) {
+    if (Uri.parse(await webCtrl.currentUrl() ?? 'https://www.instagram.com/')
+                .path
+                .split('/')[1] ==
+            'stories' &&
+        !neededCookies.contains('sessionid')) {
       loginShowCaseText = 'You need to login for downloading stories';
       update();
-      ShowCaseWidget.of(context).startShowCase([showcaseKey]);
+      if (context.mounted) {
+        ShowCaseWidget.of(context).startShowCase([showcaseKey]);
+      }
     }
   }
 
