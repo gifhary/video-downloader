@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_downloader/common/constant/common_const.dart';
+import 'package:video_downloader/core/assets/app_asset.dart';
 import 'package:video_downloader/core/route/route_const.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/home/data/repo/home_repo.dart';
@@ -9,6 +10,8 @@ import 'package:validators/validators.dart';
 
 class HomeController extends GetxController with HomeRepo {
   final mainTextFieldCtrl = TextEditingController();
+
+  final supports = [AppAsset.ytIcon, AppAsset.instaIcon, AppAsset.tiktokIcon];
 
   @override
   void onInit() {
@@ -31,7 +34,8 @@ class HomeController extends GetxController with HomeRepo {
       if (!isURL(urlStr)) throw 'Link invalid';
 
       final url = Uri.parse(urlStr);
-      switch (url.host.replaceAll('www.', '')) {
+
+      switch (url.host.replaceAll('www.', '').replaceAll('vt.', '')) {
         case CommonConst.ytDomain:
           _goToYtDownloader(url);
           break;
@@ -40,6 +44,9 @@ class HomeController extends GetxController with HomeRepo {
           break;
         case CommonConst.igDomain:
           _goToInstaDownloader(url);
+          break;
+        case CommonConst.ttDomain:
+          _goToTtDownloader(url);
           break;
         default:
           AppToast.showMsg('Your link is not supported yet');
@@ -57,5 +64,9 @@ class HomeController extends GetxController with HomeRepo {
 
   _goToYtDownloader(Uri url) {
     Get.toNamed(RouteConst.ytDownloader, arguments: {'url': url});
+  }
+
+  _goToTtDownloader(Uri url) {
+    Get.toNamed(RouteConst.ttDownloader, arguments: {'url': url});
   }
 }

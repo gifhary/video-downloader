@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:video_downloader/core/assets/app_asset.dart';
 import 'package:video_downloader/module/home/controller/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -23,13 +25,31 @@ class HomeScreen extends StatelessWidget {
                     decoration:
                         const InputDecoration(hintText: 'Paste your link here'),
                   ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: controller.mainTextFieldCtrl.text.isEmpty
-                        ? null
-                        : controller.download,
-                    child: const Text('Download'),
-                  )
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24, bottom: 42),
+                    child: ElevatedButton(
+                      onPressed: controller.mainTextFieldCtrl.text.isEmpty
+                          ? null
+                          : controller.download,
+                      child: const Text('Download'),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: controller.supports
+                        .map(
+                          (e) => Container(
+                            decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.6),
+                                shape: BoxShape.circle),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: SvgPicture.asset(e),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
                 ],
               ),
             ),

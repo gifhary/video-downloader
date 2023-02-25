@@ -66,8 +66,7 @@ class InstaDownloaderController extends GetxController
       await webCtrl.setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) async {
           await _setCookiesToNetworkClient();
-          final currentUrl = Uri.parse(
-              await webCtrl.currentUrl() ?? 'https://www.instagram.com/');
+          final currentUrl = Uri.parse(url);
           if (currentUrl.path.split('/')[1] == 'stories' &&
               currentUrl.path.split('/')[2] == 'highlights') {
             //this is for stories highlight url
