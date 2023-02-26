@@ -108,16 +108,17 @@ class InstaDownloaderScreen extends StatelessWidget {
                                             .photoOrVideo?.selectedResolution,
                                         hasAudio: controller
                                             .content.photoOrVideo?.hasAudio,
+                                        duration: controller.content
+                                            .photoOrVideo?.videoDuration,
                                         type: controller.content.mediaType,
                                         qualities: controller.content
                                                 .photoOrVideo?.sizeOptions ??
                                             [],
-                                        onDownload:
-                                            controller.content.photoOrVideo != null
-                                                ? () => controller
-                                                    .downloadMedia(controller
-                                                        .content.photoOrVideo!)
-                                                : null,
+                                        onDownload: controller.content.photoOrVideo != null
+                                            ? () => controller.downloadMedia(
+                                                controller
+                                                    .content.photoOrVideo!)
+                                            : null,
                                         onDownloadAudio:
                                             controller.content.photoOrVideo != null
                                                 ? () => controller.downloadMedia(
@@ -153,6 +154,8 @@ class InstaDownloaderScreen extends StatelessWidget {
                                                                             e) ??
                                                                     -1,
                                                                 quality),
+                                                        duration:
+                                                            e.videoDuration,
                                                         selectedQuality: e
                                                             .selectedResolution,
                                                         hasAudio: e.hasAudio,

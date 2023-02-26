@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:video_downloader/core/assets/app_asset.dart';
 import 'package:video_downloader/module/home/controller/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {

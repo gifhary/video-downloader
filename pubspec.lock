@@ -177,7 +177,7 @@ packages:
     source: hosted
     version: "4.6.5"
   html:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: html
       sha256: d9793e10dbe0e6c364f4c59bf3e01fb33a9b2a674bc7a1081693dba0614b6269
@@ -185,7 +185,7 @@ packages:
     source: hosted
     version: "0.15.1"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       sha256: "6aa2946395183537c8b880962d935877325d6a09a2867c3970c05c0fed6ac482"

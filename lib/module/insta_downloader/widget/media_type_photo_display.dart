@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_downloader/common/widget/app_image.dart';
+import 'package:video_downloader/common/widget/duration_tag.dart';
 import 'package:video_downloader/core/style/app_shadow.dart';
 import 'package:video_downloader/module/insta_downloader/data/enum/insta_media_type.dart';
 import 'package:video_downloader/module/insta_downloader/widget/insta_vid_quality_picker.dart';
@@ -13,6 +14,7 @@ class MediaTypePhotoDisplay extends StatelessWidget {
   final VoidCallback? onDownload;
   final VoidCallback? onDownloadAudio;
   final bool? hasAudio;
+  final Duration? duration;
   final InstaMediaType type;
   final Function(Size quality)? onQualitySelected;
   const MediaTypePhotoDisplay({
@@ -27,6 +29,7 @@ class MediaTypePhotoDisplay extends StatelessWidget {
     this.onDownloadAudio,
     required this.selectedQuality,
     this.onQualitySelected,
+    required this.duration,
   }) : super(key: key);
 
   @override
@@ -51,6 +54,14 @@ class MediaTypePhotoDisplay extends StatelessWidget {
                   url,
                   width: double.maxFinite,
                   fit: BoxFit.cover,
+                ),
+                Positioned(
+                  bottom: 5,
+                  right: 5,
+                  child: Visibility(
+                    visible: type == InstaMediaType.video,
+                    child: DurationTag(duration ?? const Duration()),
+                  ),
                 ),
                 Visibility(
                   visible: type == InstaMediaType.video,

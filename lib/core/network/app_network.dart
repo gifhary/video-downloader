@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class AppNetworkClient extends GetxController {
   static final dio.Dio _dio = dio.Dio()
-    ..options.connectTimeout = const Duration(seconds: 10);
+    ..options.connectTimeout = const Duration(seconds: 20);
 
   void setHeader(Map<String, dynamic> header) {
     _dio.options.headers = header;
