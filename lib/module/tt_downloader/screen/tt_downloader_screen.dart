@@ -53,11 +53,11 @@ class TtDownloaderScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(18),
                                       child: AppImage(
                                         controller.content?.profilePicUrl ?? '',
-                                        height: 30,
-                                        width: 30,
+                                        height: 35,
+                                        width: 35,
                                         placeholderSize: 20,
                                       ),
                                     ),

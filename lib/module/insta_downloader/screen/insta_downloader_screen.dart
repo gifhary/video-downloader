@@ -80,13 +80,13 @@ class InstaDownloaderScreen extends StatelessWidget {
                                       children: [
                                         ClipRRect(
                                           borderRadius:
-                                              BorderRadius.circular(15),
+                                              BorderRadius.circular(18),
                                           child: AppImage(
                                             controller
                                                     .content.authorProfilePic ??
                                                 '',
-                                            height: 30,
-                                            width: 30,
+                                            height: 35,
+                                            width: 35,
                                             placeholderSize: 20,
                                           ),
                                         ),
