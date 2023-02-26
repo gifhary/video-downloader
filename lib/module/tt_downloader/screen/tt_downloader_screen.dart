@@ -110,7 +110,8 @@ class TtDownloaderScreen extends StatelessWidget {
                               children: [
                                 Flexible(
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () =>
+                                        controller.downloadContent(true),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -125,7 +126,7 @@ class TtDownloaderScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Flexible(
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: controller.downloadContent,
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,

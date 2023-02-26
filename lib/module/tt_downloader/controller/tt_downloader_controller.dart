@@ -44,6 +44,8 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
       if (_downloadUrl == null || !isURL(_downloadUrl)) {
         throw 'Something went wrong when downloading the ${(audioOnly ?? false) ? 'audio' : 'video'}';
       }
+      debugPrint('download here: $_downloadUrl $audioOnly');
+      //TODO download
     } catch (e) {
       AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
     }
