@@ -34,7 +34,7 @@ class TtDownloaderScreen extends StatelessWidget {
                       child: SizedBox(
                         width: 120,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: controller.initData,
                           child: const Text('Try Again'),
                         ),
                       ),

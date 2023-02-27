@@ -1,11 +1,25 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:html/parser.dart';
 import 'package:video_downloader/core/network/app_network.dart';
 import 'package:video_downloader/module/tt_downloader/data/model/tt_content_model.dart';
 
 class TtDownloaderNetwork {
   final _networkClient = Get.find<AppNetworkClient>();
+
+  Future<dio.Response<dynamic>> download(
+    Uri uri,
+    String savePath, {
+    Function(int, int)? onReceiveProgress,
+  }) async {
+    try {
+      return await _networkClient.download(uri, savePath,
+          onReceiveProgress: onReceiveProgress);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<TtContentModel> getTiktokData(String url) async {
     try {

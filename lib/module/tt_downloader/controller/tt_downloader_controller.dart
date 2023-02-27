@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:validators/validators.dart';
+import 'package:video_downloader/common/utils/common_utils.dart';
 import 'package:video_downloader/core/toast/app_toast.dart';
 import 'package:video_downloader/module/tt_downloader/data/constant/tt_downloader_constant.dart';
 import 'package:video_downloader/module/tt_downloader/data/model/tt_content_model.dart';
@@ -25,9 +27,15 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
 
   @override
   void onInit() async {
+    initData();
+    super.onInit();
+  }
+
+  initData() {
+    error = false;
+    update();
     _getContentDetails();
     _getDownloadUrlFromSavefromNet();
-    super.onInit();
   }
 
   launchTtProfile(String username) async {
@@ -39,15 +47,53 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
     }
   }
 
-  downloadContent([bool? audioOnly]) {
+  downloadContent([bool? audioOnly]) async {
     try {
+      //TODO make it background service
       if (_downloadUrl == null || !isURL(_downloadUrl)) {
         throw 'Something went wrong when downloading the ${(audioOnly ?? false) ? 'audio' : 'video'}';
       }
-      debugPrint('download here: $_downloadUrl $audioOnly');
-      //TODO download
+      AppToast.showMsg(
+          'Downloading ${(audioOnly ?? false) ? 'audio' : 'video'}');
+      final dir = (audioOnly ?? false)
+          ? await getTemporaryDirectory()
+          : await CommonUtils.getSavingDirectory();
+
+      final filePath =
+          '${dir.path}/${content?.username ?? ''}-${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+      await repoDownload(
+        Uri.parse(_downloadUrl ?? ''),
+        filePath,
+        onReceiveProgress: (received, total) {
+          debugPrint('rec: $received, total: $total');
+        },
+      );
+
+      if (audioOnly ?? false) {
+        debugPrint('downloading audio');
+        await _extractAudio(filePath,
+            '${content?.username ?? ''}-${DateTime.now().millisecondsSinceEpoch}');
+      }
+
+      AppToast.showMsg(
+          '${(audioOnly ?? false) ? 'Audio' : 'Video'} downloaded');
     } catch (e) {
-      AppToast.showMsg(e.toString(), toastLength: Toast.LENGTH_LONG);
+      debugPrint('download content error: $e');
+      AppToast.showMsg(
+          'Failed downloading ${(audioOnly ?? false) ? 'audio' : 'video'}',
+          toastLength: Toast.LENGTH_LONG);
+    }
+  }
+
+  _extractAudio(String filePath, String finalFileName) async {
+    try {
+      final dir = await CommonUtils.getSavingDirectory();
+      // ignore: unused_local_variable
+      final finalFile =
+          await repoExtreactAudio(filePath, '${dir.path}/$finalFileName.mp3');
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -73,7 +119,7 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
     update();
     try {
       await webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
-      await webCtrl.loadRequest(
+      webCtrl.loadRequest(
           Uri.parse('https://en.savefrom.net/189/download-from-tiktok'));
       await webCtrl.setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) => _onPageFinished(webCtrl, url),
@@ -99,6 +145,9 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
 
       int loopIndex = 0;
       while (_downloadUrl == null) {
+        //terminate loop if its taking too long
+        if (loopIndex >= 10) throw 'Failed getting the content';
+
         await Future.delayed(const Duration(milliseconds: 500));
         final js =
             'const element$loopIndex = document.getElementsByClassName("link link-download subname ga_track_events download-icon"); element$loopIndex[0]?.getAttribute("href");';
@@ -115,6 +164,7 @@ class TtDownloaderController extends GetxController with TtDownloaderRepo {
 
       if (!isURL(_downloadUrl)) throw 'Failed getting the content';
     } catch (e) {
+      debugPrint('error on page finished: $e');
       error = true;
       AppToast.showMsg('Failed getting the content',
           toastLength: Toast.LENGTH_LONG);
