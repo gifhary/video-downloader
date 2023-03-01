@@ -9,6 +9,7 @@ import 'package:video_downloader/module/home/data/repo/home_repo.dart';
 import 'package:validators/validators.dart';
 
 class HomeController extends GetxController with HomeRepo {
+  bool loading = false;
   final mainTextFieldCtrl = TextEditingController();
 
   final supports = [AppAsset.ytIcon, AppAsset.instaIcon, AppAsset.tiktokIcon];
@@ -26,8 +27,11 @@ class HomeController extends GetxController with HomeRepo {
     super.onInit();
   }
 
-  download() {
+  download() async {
+    loading = true;
+    update();
     try {
+      await Future.delayed(const Duration(seconds: 2));
       String urlStr = mainTextFieldCtrl.text;
 
       if (!urlStr.contains('http')) urlStr = 'https://$urlStr';
@@ -56,6 +60,8 @@ class HomeController extends GetxController with HomeRepo {
       debugPrint('error: $e');
       AppToast.showMsg('Your link is invalid');
     }
+    loading = false;
+    update();
   }
 
   _goToInstaDownloader(Uri url) {
