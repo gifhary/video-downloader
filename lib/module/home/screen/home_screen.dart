@@ -21,6 +21,7 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
+                    height: 55,
                     decoration: BoxDecoration(
                         boxShadow: AppShadow.primary,
                         borderRadius: BorderRadius.circular(30)),
@@ -28,6 +29,8 @@ class HomeScreen extends StatelessWidget {
                       controller: controller.mainTextFieldCtrl,
                       onChanged: (value) => controller.update(),
                       decoration: InputDecoration(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 3),
                         prefixIcon: Transform.rotate(
                           angle: -math.pi / 4,
                           child: const Icon(
@@ -39,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                           onTap:
                               controller.loading ? null : controller.download,
                           child: Container(
-                            margin: const EdgeInsets.all(8),
+                            margin: const EdgeInsets.all(7),
                             padding: EdgeInsets.all(controller.loading ? 5 : 0),
                             decoration: BoxDecoration(
                                 color: controller.mainTextFieldCtrl.text.isEmpty
@@ -67,10 +70,10 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         suffixIconConstraints: const BoxConstraints(
-                            minWidth: 60,
-                            maxHeight: 60,
-                            maxWidth: 60,
-                            minHeight: 60),
+                            minWidth: 55,
+                            maxHeight: 55,
+                            maxWidth: 55,
+                            minHeight: 55),
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(color: Colors.grey),
                           borderRadius: BorderRadius.circular(30),
