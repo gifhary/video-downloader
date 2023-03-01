@@ -4,21 +4,24 @@ import 'package:get/get.dart';
 class AppBottomSheet {
   static Future<void> show(Widget widget, {bool isDismissable = true}) async {
     await Get.bottomSheet(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 16),
-            decoration: const BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.all(Radius.circular(3)),
+      Container(
+        constraints: BoxConstraints(maxHeight: Get.height * 0.7),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 16),
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(3)),
+              ),
+              height: 5,
+              width: 110,
             ),
-            height: 5,
-            width: 110,
-          ),
-          const SizedBox(height: 24),
-          widget
-        ],
+            const SizedBox(height: 24),
+            widget
+          ],
+        ),
       ),
       backgroundColor: Colors.white,
       isScrollControlled: true,

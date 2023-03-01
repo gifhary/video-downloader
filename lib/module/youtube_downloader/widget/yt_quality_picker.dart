@@ -24,46 +24,32 @@ class YtQualityPicker extends StatelessWidget {
 
     showOptions() {
       AppBottomSheet.show(SafeArea(
-        child: Column(
+        child: ListView(
+          shrinkWrap: true,
           children: qualities.map((e) {
-            //TODO
-            //hide K video options for now
-            //will show later for premium features
-            return e.displayName.toLowerCase().contains('k')
-                ? Container()
-                : InkWell(
-                    onTap: () => onQualityTap(e),
-                    child: Ink(
-                      color: e == quality ? Colors.green : Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            e.displayName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                    color: e == quality
-                                        ? Colors.white
-                                        : Colors.black),
-                          ),
-                          Text(
-                            e.quality,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                    color: e == quality
-                                        ? Colors.white
-                                        : Colors.black),
-                          )
-                        ],
-                      ),
+            return InkWell(
+              onTap: () => onQualityTap(e),
+              child: Ink(
+                color: e == quality ? Colors.green : Colors.transparent,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      e.displayName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: e == quality ? Colors.white : Colors.black),
                     ),
-                  );
+                    Text(
+                      e.quality,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: e == quality ? Colors.white : Colors.black),
+                    )
+                  ],
+                ),
+              ),
+            );
           }).toList(),
         ),
       ));
