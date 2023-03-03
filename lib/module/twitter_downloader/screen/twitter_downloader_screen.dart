@@ -87,6 +87,8 @@ class TwitterDownloaderScreen extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Text(
                                   controller.title ?? '',
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                               ),
