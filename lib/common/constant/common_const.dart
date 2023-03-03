@@ -3,4 +3,5 @@ class CommonConst {
   static const ytShortDomain = 'youtu.be';
   static const igDomain = 'instagram.com';
   static const ttDomain = 'tiktok.com';
+  static const twitterDomain = 'twitter.com';
 }

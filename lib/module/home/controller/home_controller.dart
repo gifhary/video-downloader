@@ -12,7 +12,12 @@ class HomeController extends GetxController with HomeRepo {
   bool loading = false;
   final mainTextFieldCtrl = TextEditingController();
 
-  final supports = [AppAsset.ytIcon, AppAsset.instaIcon, AppAsset.tiktokIcon];
+  final supports = [
+    AppAsset.ytIcon,
+    AppAsset.instaIcon,
+    AppAsset.tiktokIcon,
+    AppAsset.twitterIcon,
+  ];
 
   @override
   void onInit() {
@@ -52,6 +57,9 @@ class HomeController extends GetxController with HomeRepo {
         case CommonConst.ttDomain:
           _goToTtDownloader(url);
           break;
+        case CommonConst.twitterDomain:
+          _goToTwitterDownloader(url);
+          break;
         default:
           AppToast.showMsg('Your link is not supported yet');
           return;
@@ -74,5 +82,9 @@ class HomeController extends GetxController with HomeRepo {
 
   _goToTtDownloader(Uri url) {
     Get.toNamed(RouteConst.ttDownloader, arguments: {'url': url});
+  }
+
+  _goToTwitterDownloader(Uri url) {
+    Get.toNamed(RouteConst.twitterDownloader, arguments: {'url': url});
   }
 }
