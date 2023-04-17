@@ -25,6 +25,7 @@ class InstaDownloaderController extends GetxController
     with InstaDownloaderRepo {
   bool loading = false;
   bool error = false;
+  bool pageFinished = false;
   final BuildContext context;
 
   String loginShowCaseText =
@@ -56,15 +57,20 @@ class InstaDownloaderController extends GetxController
   initDataFromWebview() async {
     loading = true;
     error = false;
+    pageFinished = false;
     update();
     try {
       await webCtrl.setJavaScriptMode(JavaScriptMode.unrestricted);
-      // await webCtrl.setUserAgent(
-      //     'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)');
+      await webCtrl.setUserAgent(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)');
       await webCtrl
           .loadRequest(Uri.parse('${_url.origin + _url.path}?__a=1&__d=dis'));
       await webCtrl.setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) async {
+          //on page finished sometimes called multiple time on android, we only need once
+          if (pageFinished) return;
+          pageFinished = true;
+
           await _setCookiesToNetworkClient();
           final currentUrl = Uri.parse(url);
           if (currentUrl.path.split('/')[1] == 'stories' &&
@@ -76,7 +82,7 @@ class InstaDownloaderController extends GetxController
 
           final res = await webCtrl.runJavaScriptReturningResult(
               "document.documentElement.innerText");
-          debugPrint('res: $res');
+          debugPrint('res onPageFinished: $res');
 
           Map<String, dynamic> map = {};
           try {
@@ -353,6 +359,7 @@ class InstaDownloaderController extends GetxController
     try {
       final items = (map['items'] as List?)?.map((e) => e).toList();
       if (items == null || items.isEmpty) throw 'Content not found';
+      debugPrint('items length: ${items.length}');
 
       final mediaType = repoGetMediaType(items.first['media_type']);
       if (mediaType == null) throw 'Unsupported media type';

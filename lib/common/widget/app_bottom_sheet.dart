@@ -19,7 +19,7 @@ class AppBottomSheet {
               width: 110,
             ),
             const SizedBox(height: 24),
-            widget
+            Flexible(child: widget)
           ],
         ),
       ),
